@@ -2,6 +2,22 @@
 
 ## 2026-05-07
 
+### Fix — Bedtime Countdown Timer Showing Wrong Time
+
+**Problem:** The bedtime countdown displayed ~18 hours instead of ~12 hours to bedtime (10:45 PM). Two bugs:
+
+1. **Stale demo clock offset:** ActionZone used `useNow()` from the demo clock system, which had a stale time offset persisted in AsyncStorage from a previous dev session — shifting the clock ~6 hours.
+2. **Next-day rollover logic:** The "push bedtime to tomorrow" condition only triggered if bedtime was 12+ hours in the past (`< now - 12h`), leaving a ~12-hour dead zone after bedtime where the countdown was wrong.
+
+**Fixes:**
+- Replaced `useNow()` (demo clock) with a local `useRealTime()` hook that always returns `new Date()` — real device time
+- Changed next-day condition from `bedtime < now - 12h` to `bedtime <= now` so the countdown rolls to tomorrow immediately after bedtime passes
+
+**Files modified:**
+- `src/components/home/ActionZone.tsx`
+
+---
+
 ### Step 8 — Leaderboard Screen
 
 **Goal:** Build the Leaderboard tab with 4 switchable views (Team ZZZs, Team Hours, Individual ZZZs, Individual Hours) using hardcoded mock data. All data consistent with ZZZ scoring formula.

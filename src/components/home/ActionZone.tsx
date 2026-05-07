@@ -3,13 +3,21 @@ import { View, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-na
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
 import { Moon, Sun, Flame, Activity, Clock, TrendingUp } from 'lucide-react-native';
-import { useNow } from '../../lib/demoClock';
 
 const SLEEP_STATE_KEY = 'thrivv.sleep.state';
 const SLEEP_START_KEY = 'thrivv.sleep.startTime';
 const TARGET_BEDTIME_HOUR = 22;
 const TARGET_BEDTIME_MIN = 45;
 const WIND_DOWN_HOURS = 3;
+
+function useRealTime(): Date {
+  const [, tick] = useState(0);
+  useEffect(() => {
+    const id = setInterval(() => tick(t => t + 1), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return new Date();
+}
 
 type SleepState = 'awake' | 'sleeping';
 
@@ -18,7 +26,7 @@ type Props = {
 };
 
 export function ActionZone({ onWakeConfirm }: Props) {
-  const now = useNow();
+  const now = useRealTime();
   const [sleepState, setSleepState] = useState<SleepState>('awake');
   const [sleepStartMs, setSleepStartMs] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -74,7 +82,7 @@ export function ActionZone({ onWakeConfirm }: Props) {
   // Countdown calc using demo clock
   const bedtime = new Date(now);
   bedtime.setHours(TARGET_BEDTIME_HOUR, TARGET_BEDTIME_MIN, 0, 0);
-  if (bedtime.getTime() < now.getTime() - 12 * 60 * 60 * 1000) {
+  if (bedtime.getTime() <= now.getTime()) {
     bedtime.setDate(bedtime.getDate() + 1);
   }
 
