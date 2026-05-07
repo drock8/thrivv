@@ -23,7 +23,7 @@
 
 **THRIVV** — the world's first peer-pressure group sleep accountability app, built natively for the Solana Seeker phone.
 
-**Tagline (user-facing):** *Find your tribe. Thrivv.*
+**Tagline (user-facing):** *Activate your tribe. Thrivv.*
 **Tagline (sponsor-facing):** *Sponsor the recovery champions.*
 
 **One-liner:** Three friends commit to 7 hours of sleep, stake SOL to keep their word, and prove every night with a fingerprint signed by Solana Seed Vault. Hit your streak, get your stake back. Top tribes win sponsor-funded prize pools each week and month.
@@ -36,7 +36,7 @@
 
 ## 1. The pitch (memorize this)
 
-> "One in three adults are sleep-deprived. Tracking apps didn't fix it. We're going back to what worked for ten thousand years — your tribe. THRIVV is a recovery accountability platform where three friends commit to seven hours of sleep, stake SOL to keep their word, and prove it nightly with a biometric-signed transaction on Solana — the kind of attestation only a Seeker phone can produce. Hit your 7-day streak, get your stake back. Miss, and your stake goes to sleep research. The top recovery tribes each week and month win sponsor-funded prize pools — because brands that care about recovery want to be in front of the people who actually do it. Find your tribe. Thrivv."
+> "One in three adults are sleep-deprived. Tracking apps didn't fix it. We're going back to what worked for ten thousand years — your tribe. THRIVV is a recovery accountability platform where three friends commit to seven hours of sleep, stake SOL to keep their word, and prove it nightly with a biometric-signed transaction on Solana — the kind of attestation only a Seeker phone can produce. Hit your 7-day streak, get your stake back. Miss, and your stake goes to sleep research. The top recovery tribes each week and month win sponsor-funded prize pools — because brands that care about recovery want to be in front of the people who actually do it. Activate your tribe. Thrivv."
 
 **The demo moment:** the user wakes up, taps "Confirm last night," their wallet app pops up with a biometric prompt (Seed Vault, under the hood), the fingerprint signs the attestation transaction, MWA returns the signed bytes, the transaction lands on devnet, the team screen lights up green. Practice this until it takes 4 seconds. **This is what wins the hackathon.** No iOS competitor can build it — the biometric-signed-on-chain-attestation pattern requires Seeker hardware (or another Seed Vault-compatible Android device).
 
@@ -129,7 +129,7 @@
 | Cold start | **Solo onboarding with auto-match to pending team** | Kills the empty-room problem |
 | Mid-week joiner | **Practice cycle (no prize eligibility); first prize-eligible week is next Mon–Sun** | All 3 must stake by Mon 11:59pm local for tribe to be eligible |
 | Brand | **THRIVV** (double V) | Distinctive; spell loud on pitch slide |
-| Tagline (user) | **"Find your tribe. Thrivv."** | Lock |
+| Tagline (user) | **"Activate your tribe. Thrivv."** | Lock |
 | Tagline (sponsor) | **"Sponsor the recovery champions."** | For sponsor pitch slide only — don't muddle audiences |
 | Points name | **ZZZs** ("zees") | Triple meaning: sleep sound, "catching Zs" idiom, fits brand |
 | Auth model | **Wallet-only (Sign-in with Solana via Mobile Wallet Adapter)** | No email/password/OAuth. Pubkey IS identity. Profile data in Supabase keyed by pubkey |
@@ -722,4 +722,4 @@ Judges will see 40 pitches. They will remember **the fingerprint signing the nig
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*

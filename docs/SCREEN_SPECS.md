@@ -1,10 +1,162 @@
 # THRIVV — Screen Specs
 
+
 > **Living document.** UX details that will shift as the app gets built.
 > Architectural decisions live in `THRIVV_BUILD_GUIDE.md` — this file is for screen-level UX only.
 > When this file conflicts with the build guide, the build guide wins.
 
-**Version:** 1.2 (wind-down ring color spec + bedtime setting locked)
+**Version:** 1.3 (full brand palette + typography locked)
+
+---
+
+## 0. Brand foundations & design tokens
+
+> Locked design system. Every screen, component, and color reference in this doc derives from these tokens. Do not pick colors outside this palette.
+
+### Design philosophy
+
+THRIVV follows Apple HIG's three principles, scoped for our product:
+
+- **Clarity** — Single hero number per screen. The wind-down ring is *the* answer; everything else is supporting context.
+- **Deference** — Mist and cloud backgrounds defer to content. Glacier appears only on interactive or status elements — never decorative.
+- **Depth** — Modal sheets for confirmation moments (Confirm Night). Otherwise, flat cards on a flat canvas.
+
+### Color tokens
+
+#### Primary palette
+
+| Token | Hex | Role |
+|---|---|---|
+| `--primary` (Glacier) | `#5EBFB5` | Brand primary. CTAs, accents, "tribe streak active" indicator |
+| `--background` (Mist) | `#F5F2EA` | App canvas, default surface |
+| `--surface` (Cloud) | `#FFFFFF` | Cards, raised elements |
+| `--foreground` (Obsidian) | `#0A0A0A` | Primary text, headings |
+| `--muted` (Graphite) | `#6B6760` | Secondary text, captions |
+| `--border` (Bone) | `#E5E0D5` | Dividers, hairlines |
+| `--accent` (Eucalyptus) | `#B8D4C9` | Wind-down moments, inactive states |
+
+#### Semantic
+
+| Token | Hex | Use |
+|---|---|---|
+| `--success` | `#5EBFB5` | Tribe-perfect night, streak active, ✅ confirmed |
+| `--warning` | `#E89B7E` | Late to bedtime, tribe streak at risk |
+| `--danger` | `#C45A3D` | Tribe streak broken, stake forfeited (use sparingly) |
+
+#### CSS / NativeWind variables
+
+```css
+:root {
+  --primary:    #5EBFB5;
+  --background: #F5F2EA;
+  --surface:    #FFFFFF;
+  --foreground: #0A0A0A;
+  --muted:      #6B6760;
+  --border:     #E5E0D5;
+  --accent:     #B8D4C9;
+  --warning:    #E89B7E;
+  --danger:     #C45A3D;
+}
+```
+
+#### NativeWind / Tailwind config
+
+```js
+theme: {
+  extend: {
+    colors: {
+      primary:    '#5EBFB5',
+      background: '#F5F2EA',
+      surface:    '#FFFFFF',
+      foreground: '#0A0A0A',
+      muted:      '#6B6760',
+      border:     '#E5E0D5',
+      accent:     '#B8D4C9',
+      warning:    '#E89B7E',
+      danger:     '#C45A3D',
+    }
+  }
+}
+```
+
+### Wind-down ring color states (UPDATED — supersedes earlier values)
+
+The wind-down ring (Section 3.2) uses palette tokens, not arbitrary hexes:
+
+| Phase | Time remaining until bedtime | Ring color | Token |
+|---|---|---|---|
+| Wind-down phase | 3:00 → 1:00 | Eucalyptus (calm, prepare) | `--accent` `#B8D4C9` |
+| Get-ready phase | 1:00 → 0:00 | Warm coral (urgent, wrap up) | `--warning` `#E89B7E` |
+| Past bedtime | 0:00 → +∞ | Muted brick (gentle scold) | `--danger` `#C45A3D` |
+| ASLEEP (committed, phone down) | — | Obsidian with subtle Glacier pulse | `--foreground` + `--primary` |
+| WAKING (just woke up) | — | Cloud (clean, fresh) | `--surface` |
+| CONFIRMED (just signed) | — | Glacier flash → muted gold settle | `--primary` |
+| FAILED (last night missed) | — | Muted brick, no animation | `--danger` |
+
+Hard transitions, not gradients. Green is reserved exclusively for success states (✅ confirmed checks, streak +1 flashes). Glacier is the closest "success" color — use it for those moments.
+
+### Usage ratio
+
+- 70% mist + cloud (background, surfaces)
+- 20% obsidian + graphite (text, marks)
+- 8% glacier (CTAs, key moments, "inside" indicator)
+- 2% eucalyptus / accent (secondary states, wind-down ring)
+
+### Typography
+
+**Cross-platform default: Inter**, with system fallback `-apple-system, BlinkMacSystemFont, sans-serif`.
+
+#### Weights
+
+400 regular, 500 medium. **Never 600 or 700.**
+
+#### Scale
+
+| Role | Size | Weight | Line-height | Use |
+|---|---|---|---|---|
+| Display | 48px | medium | 1.0 | Sleep duration on Confirm Night, ZZZs hero on Tonight |
+| H1 | 28px | medium | 1.2 | Screen titles |
+| H2 | 22px | medium | 1.3 | Section headings |
+| H3 | 18px | medium | 1.4 | Card titles |
+| Body | 15px | regular | 1.6 | Default copy |
+| Caption | 13px | regular | 1.5 | Secondary metadata |
+| Micro | 11px | medium | 1.4, +0.5px tracking, uppercase | Status pills, labels |
+
+**Rules:**
+- Sentence case everywhere except micro labels
+- Time strings (`7h 42m`, `22:48`) use tabular figures: `font-variant-numeric: tabular-nums`
+- Numbers in stats use weight 500
+
+### Spacing & radius tokens (8pt grid)
+
+```css
+--space-1: 4px;  --space-2: 8px;  --space-3: 12px;
+--space-4: 16px; --space-6: 24px; --space-8: 32px;
+--radius-sm: 8px;  --radius-md: 12px;
+--radius-lg: 16px; --radius-pill: 999px;
+```
+
+### CTA conventions
+
+**Primary CTA:**
+- Background `--primary` (Glacier), text `#0A3A35` (dark teal for legibility on Glacier)
+- Pill shape (`--radius-pill`)
+- Padding 14px 24px, weight 500
+- Minimum hit target 44×44pt (Android Material guideline)
+
+**Secondary CTA:**
+- Transparent background, 0.5px Obsidian border, Obsidian text
+- Same pill shape
+
+### Accessibility
+
+- Min text contrast 4.5:1. Graphite on Mist passes (5.1:1).
+- Glacier on white passes large-text only — never use for body copy.
+- Status indicators (e.g., "Tribe streak active" / "Tribe streak broken") must always pair with text label, not color alone.
+- Avatar status icons paired with text on the tribe widget (🌙 + "Winding down", not just 🌙).
+- All tappable elements minimum 44×44dp.
+
+
 
 ---
 
@@ -26,12 +178,13 @@ Stretch:
 
 ---
 
+
 ## 1. Onboarding / Sign-in
 
 **Purpose:** Get the user into the app via wallet-only auth (Sign-in with Solana).
 
 **Flow:**
-1. Big logo + tagline: "Find your tribe. Thrivv."
+1. Big logo + tagline: "Activate your tribe. Thrivv."
 2. Single primary button: **"Sign in with Solana"**
 3. Tap → Mobile Wallet Adapter prompt → wallet app opens → biometric (Seed Vault on Seeker) → SIWS challenge signed
 4. On success: check if user has a `UserAccount` PDA
@@ -114,9 +267,9 @@ Three color states, hard transitions at the boundaries:
 
 | Window | Time remaining until bedtime | Ring color | Hex (starting palette — tweak in build) | Center copy |
 |---|---|---|---|---|
-| Wind-down phase | 3:00 → 1:00 | **Teal-blue** (calm, prepare) | `#4A90E2` | *"🌙 2h until bedtime"* (or whatever's accurate) |
-| Get-ready phase | 1:00 → 0:00 | **Warm amber** (urgent, wrap up) | `#F5A623` | *"⏰ 47m — wrap it up"* |
-| Past bedtime | 0:00 → +∞ | **Muted brick red** (gentle scold) | `#D0021B` desaturated to ~70% | *"⚠️ 12 min late"* |
+| Wind-down phase | 3:00 → 1:00 | **Eucalyptus** (calm, prepare) | `#B8D4C9` | *"🌙 2h until bedtime"* (or whatever's accurate) |
+| Get-ready phase | 1:00 → 0:00 | **Warm coral** (urgent, wrap up) | `#E89B7E` | *"⏰ 47m — wrap it up"* |
+| Past bedtime | 0:00 → +∞ | **Muted brick** (gentle scold) | `#C45A3D` | *"⚠️ 12 min late"* |
 
 **Important design notes:**
 - Past bedtime, the red lateness indicator should be visible but **not aggressive.** This is a sleep app — it scolds gently, not punitively. No flashing, no animations, no urgency beyond the color.
@@ -378,4 +531,4 @@ Empty states are easy to forget and brutal when missed in demos.
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*

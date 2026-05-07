@@ -1,6 +1,6 @@
 # THRIVV
 
-> *Find your tribe. Thrivv.*
+> *Activate your tribe. Thrivv.*
 
 A peer-pressure group sleep accountability app for the Solana Seeker phone. Three friends commit to seven hours of sleep, stake SOL to keep their word, and prove every night with a biometric-signed transaction on Solana. Hit your 7-day streak, get your stake back. Miss, and your stake goes to sleep research. Top tribes win sponsor-funded prize pools each week and month.
 
@@ -71,4 +71,4 @@ When in doubt:
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*

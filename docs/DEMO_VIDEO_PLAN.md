@@ -95,11 +95,11 @@ The video sets up the live segment by showing the full loop. The live segment th
 - **Frame:** Tribe screen
 - **On screen:** Three green checks across the avatars. *"5-day streak 🔥"* lights up. Sponsor pool rank visible: *"Tribe ranked #2 this week — 2.5 SOL on the line"*
 - **Action:** Static. Optional subtle confetti.
-- **Voiceover:** *"Your tribe just earned tonight. Find your tribe."*
+- **Voiceover:** *"Your tribe just earned tonight. Activate your tribe."*
 
 ### End card — 1 second
 
-- THRIVV logo + tagline: *"Find your tribe."*
+- THRIVV logo + tagline: *"Activate your tribe."*
 
 ---
 
@@ -107,7 +107,7 @@ The video sets up the live segment by showing the full loop. The live segment th
 
 Recorded as a single continuous take, then synced to visuals. Length: ~28 seconds at conversational pace.
 
-> "At 8pm, your tribe starts winding down. Sarah goes to bed first. Marcus reminds you it's almost time. Tap once — the phone watches the night. **\[7-hour cut\]** Your fingerprint signs the night to Solana. Unfakeable. On-chain. Your tribe just earned tonight. Find your tribe."
+> "At 8pm, your tribe starts winding down. Sarah goes to bed first. Marcus reminds you it's almost time. Tap once — the phone watches the night. **\[7-hour cut\]** Your fingerprint signs the night to Solana. Unfakeable. On-chain. Your tribe just earned tonight. Activate your tribe."
 
 **Read it like you mean it.** Lower register, confident, slightly slower than your nervous instinct. Pause before "Unfakeable. On-chain." — those two words carry the whole pitch.
 
@@ -213,7 +213,7 @@ Multiple light sources, color gels, scene staging. **You don't have time. Don't.
 
 ### Script (repeated for clarity)
 
-> "At 8pm, your tribe starts winding down. Sarah goes to bed first. Marcus reminds you it's almost time. Tap once — the phone watches the night. **\[pause for visual transition\]** Your fingerprint signs the night to Solana. Unfakeable. On-chain. Your tribe just earned tonight. Find your tribe."
+> "At 8pm, your tribe starts winding down. Sarah goes to bed first. Marcus reminds you it's almost time. Tap once — the phone watches the night. **\[pause for visual transition\]** Your fingerprint signs the night to Solana. Unfakeable. On-chain. Your tribe just earned tonight. Activate your tribe."
 
 ### How to record
 
@@ -326,4 +326,4 @@ Your video does NOT need to "feel real" in some authenticity sense. It needs to 
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*

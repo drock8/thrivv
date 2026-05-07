@@ -9,7 +9,6 @@
 
 **Positioning line:** *Sleep is the method. Recovery is what shows up.*
 
-**Why no score:** Every other sleep app reduces your night to a number. Thrivv treats sleep as a craft you practice. The wolf coat is the only "score" — and it takes weeks to shift, not minutes.
 
 **Feel:** Morning air. Cold plunge. The first deep breath of a day that started right.
 

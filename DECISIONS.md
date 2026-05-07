@@ -13,11 +13,12 @@ Generate with `solana-keygen new --outfile <name>.json`. Fund each with `solana 
 
 | Role | Pubkey | Notes |
 |---|---|---|
-| Founder (you) | `_______` | Your real wallet — used in demo as "You" tribe member |
-| Anatoly (demo teammate 1) | `_______` | Pre-seeded demo account |
-| Satoshi (demo teammate 2) | `_______` | Pre-seeded demo account |
-| Sleep Co (sponsor) | `_______` | Pre-funds weekly + monthly sponsor pools for demo |
-| Nonprofit recipient | `_______` | Receives forfeited weekly stakes |
+| Founder (you) | `DTk8mw34gGrQnZsYayV6mMeGxRZZ21zGEjfWg3dD6FYw` | Your real wallet — used in demo as "You" tribe member |
+| Anatoly (demo teammate 1) | `CdaUXxFVhBwh6ZG1RSXqNmfgUCViQKkt9x8qMoSWT6w6` | Pre-seeded demo account |
+| Satoshi (demo teammate 2) | `2sQ52uqzczgegggPohxLX2aG1kYQz9vbnBMF6re3wZ41` | Pre-seeded demo account |
+| Slumbr (sponsor) | `GtQp6dRxDxuhR7pry4MPxc4xojbTfrSdb9q7MWM6ksuD` | Pre-funds weekly sponsor pools for demo |
+| REM LABS (sponsor) | `3mExtWZvXvaQvUGmzdDKjnhmLU5a3dcm246MFzhvgM4e` | Pre-funds monthly sponsor pools for demo |
+| The Sleep Foundation - Nonprofit recipient | `CnFXCJVpmt4TojLXNL2koUM9h3T7venhZtLK9wRz7YPo` | Receives forfeited weekly stakes |
 
 ---
 
@@ -183,4 +184,4 @@ Quick notes during the build. Helps you reorient after breaks.
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*

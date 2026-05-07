@@ -333,4 +333,4 @@ Adding it now means every UI component built thereafter uses `useNow()` from the
 
 ---
 
-*Find your tribe. Thrivv.*
+*Activate your tribe. Thrivv.*
