@@ -23,16 +23,16 @@ type Attestation = {
 
 const MOCK_TEAM = {
   teamName: 'Sleep Seekers',
-  teamZzzs: 503,
-  teamHours: 98,
-  streakNights: 5,
-  filledDays: 5,
+  teamZzzs: 188,
+  teamHours: 73,
+  streakNights: 2,
+  filledDays: 4,
 };
 
 const MOCK_TEAMMATES = [
-  { name: 'Anatoly', hours: 32, zzzs: 152, streak: 4, isYou: false },
-  { name: 'You', hours: 36, zzzs: 184, streak: 5, isYou: true },
-  { name: 'Satoshi', hours: 30, zzzs: 167, streak: 3, isYou: false },
+  { name: 'Anatoly', hours: 26, zzzs: 66, streak: 3, isYou: false },
+  { name: 'You', hours: 19, zzzs: 53, streak: 2, isYou: true },
+  { name: 'Satoshi', hours: 28, zzzs: 69, streak: 4, isYou: false },
 ];
 
 function explorerUrl(sig: string) {

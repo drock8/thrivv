@@ -2,6 +2,27 @@
 
 ## 2026-05-07
 
+### Step 7c — Correct Mock Data to Match ZZZ Scoring Formula
+
+**Goal:** Replace placeholder mock numbers with correctly calculated values using the nightZzzs() formula. Team streak = worst individual streak (was incorrectly 5, now 2).
+
+**Night-by-night inputs (4 nights this week):**
+- Anatoly: 7 + 7 + 7 + 5 = 26h, streak 3
+- You: 7 + 7 + 5 + 0 = 19h, streak 2
+- Satoshi: 7 + 7 + 7 + 7 = 28h, streak 4
+- Tribe hit (all 3 ≥ 7h): nights 1-2 only
+
+**Calculated values:**
+- Anatoly: 66 ZZZs (24+24+8+5 + 5 solo streak bonus)
+- You: 53 ZZZs (24+24+5+0)
+- Satoshi: 69 ZZZs (24+24+8+8 + 5 solo streak bonus)
+- Team: 188 ZZZs, 73h, streak 2, 4 days filled
+
+**Files modified:**
+- `src/screens/HomeScreen.tsx` — Updated MOCK_TEAM and MOCK_TEAMMATES constants
+
+---
+
 ### Step 7b — Attestation Polish + Bug Fixes
 
 **Fixes:**
