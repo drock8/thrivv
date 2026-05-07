@@ -51,3 +51,27 @@
 - `src/screens/HomeScreen.tsx` — Removed demo clock debug text. Added temporary NativeWind test box (`bg-primary p-4 rounded-lg`) to verify palette renders correctly. Will remove after confirmation.
 
 **Status:** TypeScript compiles clean. Awaiting on-device test.
+
+---
+
+### Step 4 — Cleanup + Avatar Bundle Map
+
+**Goal:** Remove the temporary NativeWind test box from HomeScreen (Step 3 verification complete). Create the avatar bundle map per THRIVV_BUILD_GUIDE.md section 4.5 so demo avatars resolve from bundled PNGs.
+
+**Files created:**
+- `src/lib/avatars.ts` — `AVATAR_BUNDLE` map keyed by lowercase display name (`'anatoly'`, `'satoshi'`, `'you'`), each pointing to a `require()` of the corresponding PNG in `assets/avatars/`. Exports `getAvatar(name)` for case-insensitive lookup; returns `null` for non-demo users (identicon fallback layer deferred). Typed with `ImageSourcePropType`.
+
+**Files edited:**
+- `src/screens/HomeScreen.tsx` — Removed the temporary `<View className="bg-primary ...">` test box and the unused `RNText` import. NativeWind import structure preserved for future components.
+
+**Avatar PNGs verified:**
+- `assets/avatars/anatoly.png` (93 KB)
+- `assets/avatars/satoshi.png` (85 KB)
+- `assets/avatars/you.png` (94 KB)
+
+**Status:** TypeScript compiles clean. Avatar map not yet wired into any component — that happens when the Tribe screen is built.
+
+**On-device verification (Step 4):**
+- Temporarily wired `getAvatar('anatoly')` into HomeScreen as a 64×64 circular `<Image>` — rendered correctly on Seeker. Removed after confirmation.
+- Temporarily wired demo clock controls (setTime, freeze, unfreeze, reset) with live clock readout into HomeScreen — all four operations confirmed working on Seeker. Removed after confirmation.
+- All Step 1–4 features verified working on device. HomeScreen returned to clean state.

@@ -1,5 +1,5 @@
 import React from "react";
-import { StyleSheet, View, Text as RNText } from "react-native";
+import { StyleSheet, View } from "react-native";
 import { Text } from "react-native-paper";
 
 import { Section } from "../Section";
@@ -7,6 +7,7 @@ import { useAuthorization } from "../utils/useAuthorization";
 import { AccountDetailFeature } from "../components/account/account-detail-feature";
 import { MemoTestButton } from "../components/memo-test/MemoTestButton";
 import { SignInFeature } from "../components/sign-in/sign-in-feature";
+
 
 export function HomeScreen() {
   const { selectedAccount } = useAuthorization();
@@ -23,9 +24,6 @@ export function HomeScreen() {
         <>
           <AccountDetailFeature />
           <MemoTestButton />
-          <View className="bg-primary p-4 rounded-lg mt-4">
-            <RNText className="text-foreground font-medium">NativeWind + palette working</RNText>
-          </View>
         </>
       ) : (
         <>
