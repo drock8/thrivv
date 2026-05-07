@@ -28,4 +28,26 @@
 **Files edited:**
 - `App.tsx` — Wrapped entire app tree with `<DemoClockProvider>` as outermost provider (outside QueryClientProvider, ClusterProvider, ConnectionProvider, etc.).
 
-**Status:** Confirmed working on Seeker. Demo clock ticks every second on HomeScreen. Temporary debug `<Text>` renders `useNow().toLocaleTimeString()` — will remove after Step 3.
+**Status:** Confirmed working on Seeker. Demo clock ticks every second on HomeScreen. Debug text removed after confirmation.
+
+---
+
+### Hour 0 — NativeWind + Locked Palette (Step 3)
+
+**Goal:** Wire NativeWind v4 with the locked THRIVV brand palette so every new screen uses Tailwind utility classes with branded color tokens. Existing react-native-paper components untouched.
+
+**Packages installed:**
+- `nativewind@4.1.23`, `tailwindcss@3.4.17`, `react-native-reanimated@~3.16.7`
+
+**Files created:**
+- `tailwind.config.js` — Locked palette tokens: primary (#5EBFB5 Glacier), background (#F5F2EA Mist), surface (#FFFFFF Cloud), foreground (#0A0A0A Obsidian), muted (#6B6760 Graphite), border (#E5E0D5 Bone), accent (#B8D4C9 Eucalyptus), warning (#E89B7E Coral), danger (#C45A3D Brick). Uses `nativewind/preset`.
+- `global.css` — Tailwind base/components/utilities directives.
+- `nativewind-env.d.ts` — TypeScript support for `className` prop on RN components.
+
+**Files edited:**
+- `babel.config.js` — Added `jsxImportSource: "nativewind"` to babel-preset-expo, added `nativewind/babel` preset. Paper production plugin preserved.
+- `metro.config.js` — Wrapped config with `withNativeWind()`. Existing crypto polyfill preserved.
+- `App.tsx` — Added `import "./global.css"` after polyfills.
+- `src/screens/HomeScreen.tsx` — Removed demo clock debug text. Added temporary NativeWind test box (`bg-primary p-4 rounded-lg`) to verify palette renders correctly. Will remove after confirmation.
+
+**Status:** TypeScript compiles clean. Awaiting on-device test.

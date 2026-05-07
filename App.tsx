@@ -1,5 +1,6 @@
 // Polyfills
 import "./src/polyfills";
+import "./global.css";
 
 import { StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
