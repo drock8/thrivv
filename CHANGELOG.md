@@ -2,6 +2,46 @@
 
 ## 2026-05-07
 
+### Step 6 — Home Screen Shell (Dark Theme + Bottom Nav)
+
+**Goal:** Build the dark-themed Home Screen layout with 3 sections (Team card, Teammate cards, Action zone) + 3-tab bottom nav (Home/Leaderboard/Profile). Remove all template placeholder UI. Wire MWA memo signing into the action button.
+
+**Sub-steps completed:**
+
+**Step 6.1 — Dark palette tokens:** Updated `tailwind.config.js` — swapped background to Obsidian (#0A0A0A), foreground to Mist (#F5F2EA), surface to near-black (#171717), border to dark (#2A2A2A). Added action (#E89B7E) and actionDeep (#D97A5C) tokens. Primary/accent/muted/warning/danger unchanged.
+
+**Step 6.2 — ZZZ scoring constants:** Created `src/lib/zzzScoring.ts` — V1 constants (HOURS_CAP=7.0, TARGET_HOURS=7.0, TRIBE_MULTIPLIER=3, streak bonuses, per-week caps) and `nightZzzs()` function.
+
+**Packages installed:**
+- `react-native-svg@15.8.0` — SVG rendering for concentric progress rings
+- `lucide-react-native@^1.14.0` — Icon library (Home, Trophy, User, Moon, Sun, Flame, etc.)
+
+**Files created:**
+- `src/lib/zzzScoring.ts` — V1 scoring constants and nightZzzs() pure function
+- `src/components/home/ProgressRing.tsx` — Reusable double concentric SVG ring (inner + outer progress arcs with configurable colors, stroke widths, gap). Used by both TeamCard and TeammateCard.
+- `src/components/home/TeamCard.tsx` — Section 1: team avatar with double ring, team name + pencil, big score number, weekly %, day-of-week dots (filled/dashed), streak text
+- `src/components/home/TeammateCard.tsx` — Section 2: individual member card with name, avatar + double ring, percentage, ZZZ score, streak dots with checkmarks
+- `src/components/home/ActionZone.tsx` — Section 3: countdown ring (uses useNow() demo clock), bed time label, last night/average/streak/consistency stats, two-state action button (I'M GOING TO SLEEP / I'M WAKING UP) with AsyncStorage persistence and MWA memo callback
+- `src/screens/LeaderboardScreen.tsx` — Placeholder stub (Trophy icon + "Coming next")
+- `src/screens/ProfileScreen.tsx` — Placeholder stub (User icon + "Coming next")
+
+**Files edited:**
+- `tailwind.config.js` — Dark theme palette swap + new action tokens
+- `src/screens/HomeScreen.tsx` — Complete rewrite. Removed all template placeholders (Solana Mobile Expo Template text, Section components, AccountDetailFeature, MemoTestButton, Supabase test button). New layout: ScrollView with 3 sections using mock data (team_hours=98, team_zzzs=503; Anatoly 32h/152z, You 36h/184z, Satoshi 30h/167z). Signed-in state shows full dashboard. Not-signed-in state shows THRIVV branding + SignInFeature.
+- `src/screens/index.ts` — Added LeaderboardScreen and ProfileScreen exports
+- `src/navigators/HomeNavigator.tsx` — Replaced 2-tab (Home/Blank) with 3-tab (Home/Leaderboard/Profile). Switched from MaterialCommunityIcons to lucide-react-native. Dark tab bar styling (Obsidian bg, Glacier active, Graphite inactive).
+- `App.tsx` — Force dark background (#0A0A0A) on SafeAreaView instead of system color scheme
+
+**Mock data (hardcoded for v1):**
+- Team: "The Sleep Lions", 503 ZZZs, 98 hours, 5-night streak, 5 filled days
+- Anatoly: 32h / 152 ZZZs, 4-night streak
+- You: 36h / 184 ZZZs, 5-night streak
+- Satoshi: 30h / 167 ZZZs, 3-night streak
+
+**Status:** TypeScript compiles clean. Awaiting on-device verification.
+
+---
+
 ### Hour 0 — MWA Memo Round-Trip (Step 1)
 
 **Goal:** De-risk MWA signing by proving a full round-trip: button tap → wallet biometric → memo transaction lands on devnet → tx hash visible on screen.
@@ -75,3 +115,29 @@
 - Temporarily wired `getAvatar('anatoly')` into HomeScreen as a 64×64 circular `<Image>` — rendered correctly on Seeker. Removed after confirmation.
 - Temporarily wired demo clock controls (setTime, freeze, unfreeze, reset) with live clock readout into HomeScreen — all four operations confirmed working on Seeker. Removed after confirmation.
 - All Step 1–4 features verified working on device. HomeScreen returned to clean state.
+
+---
+
+### Step 5 — Supabase Client + Profile Helpers
+
+**Goal:** Install Supabase JS client, create typed client init + profile helpers, generate SQL migration for the 3 v1 tables. Prepares the off-chain layer for demo seeding, tribe metadata, and nudge rate-limiting.
+
+**Packages installed:**
+- `@supabase/supabase-js@^2.105.3`
+
+**Files created:**
+- `src/lib/supabase.ts` — Supabase client init reading `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` from environment. Throws on missing vars (fail-fast).
+- `src/lib/profiles.ts` — Typed `Profile` type + two helpers: `getProfile(pubkey)` returns profile or null, `upsertProfile({pubkey, display_name?, avatar_url?})` inserts or updates by pubkey. Both use the typed Supabase client.
+- `.env.local` — Template with placeholder Supabase credentials (gitignored via `.env*.local` rule).
+
+**SQL migration (run manually in Supabase SQL Editor):**
+- `profiles` — pubkey TEXT PK, display_name, avatar_url, created_at
+- `team_metadata` — team_pda TEXT PK, team_name, updated_at
+- `nudges` — from_pubkey, to_pubkey, sent_at + composite index for rate-limit queries
+- RLS enabled on all 3 tables with permissive demo policies (tighten post-hackathon)
+
+**Status:** TypeScript compiles clean. Awaiting Supabase project creation + credentials to wire up.
+
+**Addendum — team_avatar_url column + teams helper:**
+- `team_metadata` table updated with `team_avatar_url text not null default ''` column for leaderboard team visuals.
+- `src/lib/teams.ts` — Typed `TeamMetadata` type, `teamAvatarUrl(teamName)` helper that generates a DiceBear shapes SVG URL from the team name, `getTeamMetadata(teamPda)` and `upsertTeamMetadata({...})` helpers matching the profiles pattern.

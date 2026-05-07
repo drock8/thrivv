@@ -54,12 +54,7 @@ export default function App() {
             <SafeAreaView
               style={[
                 styles.shell,
-                {
-                  backgroundColor:
-                    colorScheme === "dark"
-                      ? MD3DarkTheme.colors.background
-                      : MD3LightTheme.colors.background,
-                },
+                { backgroundColor: '#0A0A0A' },
               ]}
             >
               <PaperProvider

@@ -98,9 +98,9 @@ For the demo clock and seeded `NightAttestation` records.
 
 | Item | Value |
 |---|---|
-| Project URL | `_______` |
-| Anon key (in `.env` only — never commit) | `_______` |
-| Tables migrated v1 | `profiles`, `team_metadata`, `nudges` |
+| Project URL | `https://nebhqbtaskgmelzzzfaf.supabase.co` |
+| Anon key (in `.env.local` only — never commit) | Set in `.env.local` |
+| Tables migrated v1 | `profiles`, `team_metadata` (with `team_avatar_url`), `nudges` |
 | Tables deferred to v2 | `join_intents`, `chat_messages` |
 
 ---
@@ -184,5 +184,17 @@ Quick notes during the build. Helps you reorient after breaks.
 | 9 | _______ | _______ |
 
 ---
+
+  ## 12. V1 runtime pivots (added during build)
+
+  These decisions were made during the build session and supersede earlier specs in docs/. The full spec docs will be updated post-hackathon.
+
+  - Theme: DARK. Obsidian background, Mist text, Glacier accents, Coral/orange action button.
+  - HOURS_CAP = 7.0 for V1 (was 9.0). Simplifies "100% = hit 7h every night" narrative.
+  - Per-week caps: individual 49 hours / 225 ZZZs; team 147 hours / 675 ZZZs.
+  - Action button: two-state for V1. "I'm Going to Sleep" ↔ "I'm Waking Up". "Back to Sleep" deferred to v2.
+  - Home screen: 3 sections (Team card, 3 teammate cards, Action zone) + bottom nav (Home/Leaderboard/Profile).
+  - Avatars: real photos for demo tribe; DiceBear shapes for others.
+  - Anchor program: NOT DEPLOYED for V1. MWA-signed memo transactions for all on-chain proof.
 
 *Activate your tribe. Thrivv.*
