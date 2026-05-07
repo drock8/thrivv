@@ -14,10 +14,10 @@ const WIND_DOWN_HOURS = 3;
 type SleepState = 'awake' | 'sleeping';
 
 type Props = {
-  onSleepAction?: (state: SleepState) => Promise<void>;
+  onWakeConfirm?: (durationMs: number) => Promise<string | null>;
 };
 
-export function ActionZone({ onSleepAction }: Props) {
+export function ActionZone({ onWakeConfirm }: Props) {
   const now = useNow();
   const [sleepState, setSleepState] = useState<SleepState>('awake');
   const [sleepStartMs, setSleepStartMs] = useState<number | null>(null);
@@ -55,7 +55,7 @@ export function ActionZone({ onSleepAction }: Props) {
     setLoading(true);
     setShowWakeModal(false);
     try {
-      if (onSleepAction) await onSleepAction('awake');
+      if (onWakeConfirm) await onWakeConfirm(sleepDurationMs);
       await AsyncStorage.setItem(SLEEP_STATE_KEY, 'awake');
       await AsyncStorage.removeItem(SLEEP_START_KEY);
       setSleepState('awake');

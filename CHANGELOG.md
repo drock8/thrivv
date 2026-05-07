@@ -2,6 +2,35 @@
 
 ## 2026-05-07
 
+### Step 7 — Solana Explorer Attestation Visibility
+
+**Goal:** Make the on-chain sleep proof visible and tappable — the demo's primary credibility moment for judges.
+
+**Part A: Success toast after wake confirm.**
+- Glacier-bordered toast slides in from top after MWA tx succeeds
+- Line 1: "Night logged on chain" (Glacier)
+- Line 2: "{hours}h {mins}m · {zzzs} ZZZs earned" (Mist)
+- Line 3: "View on Solana Explorer →" — tappable, opens browser to devnet explorer tx page
+- Auto-dismisses after 8 seconds, tap anywhere to dismiss early
+- Animated slide+fade in/out using RN Animated API
+
+**Part B: Persistent "Last on-chain proof" line.**
+- Positioned between Section 2 (Teammate Cards) and Section 3 (Action Zone)
+- Shows "Last on-chain proof: {hours}h {mins}m on {date} →" in Graphite text
+- Tappable — opens same Solana Explorer URL
+- Hidden when no attestation exists (fresh state)
+- Last tx metadata (sig, hours, mins, zzzs, date) persisted in AsyncStorage under `thrivv.lastAttestation`
+
+**ActionZone prop change:** `onSleepAction` → `onWakeConfirm(durationMs) => Promise<string | null>`. MWA tx only fires on wake confirm. Returns signature to HomeScreen for toast + persistence.
+
+**Files modified:**
+- `src/screens/HomeScreen.tsx` — Full rewrite: toast system, attestation persistence, proof line between sections 2-3, updated callback
+- `src/components/home/ActionZone.tsx` — Changed prop from `onSleepAction` to `onWakeConfirm` returning signature
+
+**Status:** TypeScript compiles clean. Awaiting on-device verification.
+
+---
+
 ### Step 6c — Home Screen UX Polish Pass 2
 
 **Goal:** Additional visual polish — logo, streak redesign, hours labels, layout alignment, team identity update.
