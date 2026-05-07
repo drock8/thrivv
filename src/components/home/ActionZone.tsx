@@ -52,15 +52,14 @@ export function ActionZone({ onWakeConfirm }: Props) {
   };
 
   const handleConfirmWake = async () => {
-    setLoading(true);
     setShowWakeModal(false);
-    try {
-      if (onWakeConfirm) await onWakeConfirm(sleepDurationMs);
-      await AsyncStorage.setItem(SLEEP_STATE_KEY, 'awake');
-      await AsyncStorage.removeItem(SLEEP_START_KEY);
-      setSleepState('awake');
-      setSleepStartMs(null);
-    } catch {}
+    // Persist awake state FIRST — app may background during MWA wallet switch
+    await AsyncStorage.setItem(SLEEP_STATE_KEY, 'awake');
+    await AsyncStorage.removeItem(SLEEP_START_KEY);
+    setSleepState('awake');
+    setSleepStartMs(null);
+    setLoading(true);
+    if (onWakeConfirm) await onWakeConfirm(sleepDurationMs);
     setLoading(false);
   };
 

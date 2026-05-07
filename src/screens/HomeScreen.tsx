@@ -1,5 +1,5 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, View, Text, Image, Animated, TouchableOpacity, Linking } from 'react-native';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { ScrollView, View, Text, Image, Animated, TouchableOpacity, Linking, Alert, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useAuthorization } from '../utils/useAuthorization';
 import { SignInFeature } from '../components/sign-in/sign-in-feature';
@@ -49,11 +49,19 @@ export function HomeScreen() {
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  useEffect(() => {
+  const loadAttestation = useCallback(() => {
     AsyncStorage.getItem(ATTESTATION_KEY).then(val => {
       if (val) setLastAttestation(JSON.parse(val));
     });
   }, []);
+
+  useEffect(() => {
+    loadAttestation();
+    const sub = AppState.addEventListener('change', (state) => {
+      if (state === 'active') loadAttestation();
+    });
+    return () => sub.remove();
+  }, [loadAttestation]);
 
   const showToast = (data: { hours: number; mins: number; zzzs: number; sig: string }) => {
     setToast(data);
@@ -83,20 +91,25 @@ export function HomeScreen() {
     const zzzs = 24.0;
     const memo = `thrivv:submit_night:user=${pubkey}:date=${ts}:hours=${hrs + mins / 60}:zzzs=${zzzs}`;
 
-    const sig = await memoMutation.mutateAsync(memo);
-    if (sig) {
-      const attestation: Attestation = {
-        sig,
-        hours: hrs,
-        mins,
-        zzzs,
-        date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      };
-      await AsyncStorage.setItem(ATTESTATION_KEY, JSON.stringify(attestation));
-      setLastAttestation(attestation);
-      showToast({ hours: hrs, mins, zzzs, sig });
+    try {
+      const sig = await memoMutation.mutateAsync(memo);
+      if (sig) {
+        const attestation: Attestation = {
+          sig,
+          hours: hrs,
+          mins,
+          zzzs,
+          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+        };
+        await AsyncStorage.setItem(ATTESTATION_KEY, JSON.stringify(attestation));
+        setLastAttestation(attestation);
+        showToast({ hours: hrs, mins, zzzs, sig });
+        return sig;
+      }
+    } catch (e: any) {
+      Alert.alert('Attestation error', e?.message ?? String(e));
     }
-    return sig;
+    return null;
   };
 
   if (!selectedAccount) {
@@ -203,9 +216,15 @@ export function HomeScreen() {
           <TouchableOpacity
             onPress={() => Linking.openURL(explorerUrl(lastAttestation.sig))}
             activeOpacity={0.7}
-            style={{ paddingHorizontal: 20, paddingVertical: 4 }}
+            style={{
+              marginHorizontal: 16,
+              backgroundColor: 'rgba(232, 155, 126, 0.15)',
+              borderRadius: 12,
+              paddingVertical: 8,
+              paddingHorizontal: 14,
+            }}
           >
-            <Text style={{ color: '#6B6760', fontSize: 11, textAlign: 'center' }}>
+            <Text style={{ color: '#E89B7E', fontSize: 12, fontWeight: '500', textAlign: 'center' }}>
               Last on-chain proof: {lastAttestation.hours}h {lastAttestation.mins}m on {lastAttestation.date} →
             </Text>
           </TouchableOpacity>

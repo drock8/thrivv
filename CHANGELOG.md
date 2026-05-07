@@ -2,6 +2,20 @@
 
 ## 2026-05-07
 
+### Step 7b — Attestation Polish + Bug Fixes
+
+**Fixes:**
+- Timer no longer continues after wake confirm — AsyncStorage writes `awake` state BEFORE MWA wallet switch so remount reads correct state
+- Added `AppState` listener to reload attestation from AsyncStorage when app returns to foreground after MWA
+- MWA errors now surface via Alert instead of being silently swallowed
+- Persistent proof line styled with light peach background block (`rgba(232, 155, 126, 0.15)`), Coral text, rounded corners — stands out for demo credibility
+
+**Files modified:**
+- `src/screens/HomeScreen.tsx`
+- `src/components/home/ActionZone.tsx`
+
+---
+
 ### Step 7 — Solana Explorer Attestation Visibility
 
 **Goal:** Make the on-chain sleep proof visible and tappable — the demo's primary credibility moment for judges.
