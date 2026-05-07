@@ -5,6 +5,7 @@ import { Text } from "react-native-paper";
 import { Section } from "../Section";
 import { useAuthorization } from "../utils/useAuthorization";
 import { AccountDetailFeature } from "../components/account/account-detail-feature";
+import { MemoTestButton } from "../components/memo-test/MemoTestButton";
 import { SignInFeature } from "../components/sign-in/sign-in-feature";
 
 export function HomeScreen() {
@@ -19,7 +20,10 @@ export function HomeScreen() {
         Solana Mobile Expo Template
       </Text>
       {selectedAccount ? (
-        <AccountDetailFeature />
+        <>
+          <AccountDetailFeature />
+          <MemoTestButton />
+        </>
       ) : (
         <>
           <Section

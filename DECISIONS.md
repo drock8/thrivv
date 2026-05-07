@@ -171,6 +171,7 @@ Quick notes during the build. Helps you reorient after breaks.
 
 | Hour | What was done | Blockers |
 |---|---|---|
+| 0–1 | MWA round-trip working: tap Test Sign → fakewallet → devnet → memo tx confirmed → explorer link verified | None — fakewallet good enough for v1 demo, can upgrade to Solflare for biometric polish at hour 7 |
 | 0 | _______ | _______ |
 | 1 | _______ | _______ |
 | 2 | _______ | _______ |
