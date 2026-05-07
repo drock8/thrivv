@@ -28,4 +28,4 @@
 **Files edited:**
 - `App.tsx` — Wrapped entire app tree with `<DemoClockProvider>` as outermost provider (outside QueryClientProvider, ClusterProvider, ConnectionProvider, etc.).
 
-**Status:** TypeScript compiles clean. Awaiting on-device test.
+**Status:** Confirmed working on Seeker. Demo clock ticks every second on HomeScreen. Temporary debug `<Text>` renders `useNow().toLocaleTimeString()` — will remove after Step 3.
