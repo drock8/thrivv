@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
@@ -134,95 +134,91 @@ export function ActionZone({ onSleepAction }: Props) {
         {/* Center: countdown ring or sleep timer */}
         <View style={{ alignItems: 'center' }}>
           {sleepState === 'sleeping' ? (
-            <>
-              <Text style={{ color: '#5EBFB5', fontSize: 11, fontWeight: '500', marginBottom: 2 }}>
-                Sleeping...
-              </Text>
-              <View style={{ width: ringSize, height: ringSize }}>
-                <Svg width={ringSize} height={ringSize}>
+            <View style={{ width: ringSize, height: ringSize }}>
+              <Svg width={ringSize} height={ringSize}>
+                <Circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#2A2A2A"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                />
+                <Circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#5EBFB5"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                  strokeDasharray={`${circumference * 0.15} ${circumference * 0.05}`}
+                  strokeDashoffset={0}
+                  strokeLinecap="round"
+                  rotation={-90 + (sleepElapsedSec % 60) * 6}
+                  origin={`${center}, ${center}`}
+                />
+              </Svg>
+              <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+                <Text style={{ color: '#5EBFB5', fontSize: 10, fontWeight: '500', marginBottom: 2 }}>
+                  Sleeping...
+                </Text>
+                <Text className="text-foreground" style={{ fontSize: 32, fontWeight: '500', fontVariant: ['tabular-nums'] }}>
+                  {String(sleepHrs).padStart(2, '0')}:{String(sleepMins).padStart(2, '0')}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 18 }}>
+                  <Text className="text-muted" style={{ fontSize: 8, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    Hrs
+                  </Text>
+                  <Text className="text-muted" style={{ fontSize: 8, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    Mins
+                  </Text>
+                </View>
+              </View>
+            </View>
+          ) : (
+            <View style={{ width: ringSize, height: ringSize }}>
+              <Svg width={ringSize} height={ringSize}>
+                <Circle
+                  cx={center}
+                  cy={center}
+                  r={radius}
+                  stroke="#2A2A2A"
+                  strokeWidth={strokeWidth}
+                  fill="none"
+                />
+                {inWindDown && (
                   <Circle
                     cx={center}
                     cy={center}
                     r={radius}
-                    stroke="#2A2A2A"
+                    stroke={ringColor}
                     strokeWidth={strokeWidth}
                     fill="none"
-                  />
-                  <Circle
-                    cx={center}
-                    cy={center}
-                    r={radius}
-                    stroke="#5EBFB5"
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                    strokeDasharray={`${circumference * 0.15} ${circumference * 0.05}`}
+                    strokeDasharray={`${dashLen} ${circumference - dashLen}`}
                     strokeDashoffset={0}
                     strokeLinecap="round"
-                    rotation={-90 + (sleepElapsedSec % 60) * 6}
+                    rotation={-90}
                     origin={`${center}, ${center}`}
                   />
-                </Svg>
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text className="text-foreground" style={{ fontSize: 36, fontWeight: '500', fontVariant: ['tabular-nums'] }}>
-                    {String(sleepHrs).padStart(2, '0')}:{String(sleepMins).padStart(2, '0')}
+                )}
+              </Svg>
+              <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
+                <Text className="text-foreground" style={{ fontSize: 32, fontWeight: '500', fontVariant: ['tabular-nums'] }}>
+                  {String(countdownHrs).padStart(2, '0')}:{String(countdownMins).padStart(2, '0')}
+                </Text>
+                <View style={{ flexDirection: 'row', gap: 18 }}>
+                  <Text className="text-muted" style={{ fontSize: 8, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    Hrs
                   </Text>
-                  <View style={{ flexDirection: 'row', gap: 20 }}>
-                    <Text className="text-muted" style={{ fontSize: 9, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                      Hrs
-                    </Text>
-                    <Text className="text-muted" style={{ fontSize: 9, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                      Mins
-                    </Text>
-                  </View>
-                </View>
-              </View>
-            </>
-          ) : (
-            <>
-              <Text style={{ color: '#E89B7E', fontSize: 11, fontWeight: '500', marginBottom: 2 }}>
-                Bed by {bedtimeStr}
-              </Text>
-              <View style={{ width: ringSize, height: ringSize }}>
-                <Svg width={ringSize} height={ringSize}>
-                  <Circle
-                    cx={center}
-                    cy={center}
-                    r={radius}
-                    stroke="#2A2A2A"
-                    strokeWidth={strokeWidth}
-                    fill="none"
-                  />
-                  {inWindDown && (
-                    <Circle
-                      cx={center}
-                      cy={center}
-                      r={radius}
-                      stroke={ringColor}
-                      strokeWidth={strokeWidth}
-                      fill="none"
-                      strokeDasharray={`${dashLen} ${circumference - dashLen}`}
-                      strokeDashoffset={0}
-                      strokeLinecap="round"
-                      rotation={-90}
-                      origin={`${center}, ${center}`}
-                    />
-                  )}
-                </Svg>
-                <View style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, alignItems: 'center', justifyContent: 'center' }}>
-                  <Text className="text-foreground" style={{ fontSize: 36, fontWeight: '500', fontVariant: ['tabular-nums'] }}>
-                    {String(countdownHrs).padStart(2, '0')}:{String(countdownMins).padStart(2, '0')}
+                  <Text className="text-muted" style={{ fontSize: 8, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
+                    Mins
                   </Text>
-                  <View style={{ flexDirection: 'row', gap: 20 }}>
-                    <Text className="text-muted" style={{ fontSize: 9, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                      Hrs
-                    </Text>
-                    <Text className="text-muted" style={{ fontSize: 9, fontWeight: '500', letterSpacing: 0.5, textTransform: 'uppercase' }}>
-                      Mins
-                    </Text>
-                  </View>
                 </View>
+                <Text style={{ color: '#E89B7E', fontSize: 10, fontWeight: '500', marginTop: 2 }}>
+                  Bed by {bedtimeStr}
+                </Text>
               </View>
-            </>
+            </View>
           )}
         </View>
 

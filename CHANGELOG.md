@@ -2,6 +2,38 @@
 
 ## 2026-05-07
 
+### Step 6c — Home Screen UX Polish Pass 2
+
+**Goal:** Additional visual polish — logo, streak redesign, hours labels, layout alignment, team identity update.
+
+**Changes:**
+
+1. **THRIVV logo:** Added centred bone logo (`assets/thrivv-logo-bone.png`) at top of HomeScreen. Sized at 190x59 with tight padding.
+
+2. **Team name + avatar:** Changed from "The Sleep Lions" / you.png to "Sleep Seekers" / sleep-seekers.png.
+
+3. **Team ring 20% bigger:** Ring 100→120, avatar 62→74, strokes scaled proportionally. Team is the hero element.
+
+4. **Hours label on inner ring:** Added Eucalyptus-colored "Xh / Xh" text below both team and individual rings so the inner ring meaning (hours) is clear.
+
+5. **Streak pill simplified:** Team streak pill now shows dots + number only (no "STREAK X DAYS" text). 4 dots then the streak count replacing the 5th position.
+
+6. **Individual streak pill:** Converted from 5 separate dots to same merged pill style as team — 7 circles for the week, active ones merged into Glacier pill with number.
+
+7. **Teammate bottom-alignment:** Avatar/ring row aligns to bottom (`flex-end`) so the "You" larger card and smaller cards share a baseline.
+
+8. **Countdown + sleep labels inside ring:** "Bed by 10:45 PM" moved inside the countdown ring below the time. "Sleeping..." moved inside the ring above the timer.
+
+**Files modified:**
+- `src/screens/HomeScreen.tsx`
+- `src/components/home/TeamCard.tsx`
+- `src/components/home/TeammateCard.tsx`
+- `src/components/home/ActionZone.tsx`
+
+**Status:** TypeScript compiles clean. Awaiting on-device verification.
+
+---
+
 ### Step 6b — Home Screen UX Polish Pass
 
 **Goal:** Visual polish and interaction fixes based on on-device review. No logic or data changes beyond sleep action flow.

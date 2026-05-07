@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text, Alert } from 'react-native';
+import { ScrollView, View, Text, Alert, Image } from 'react-native';
 import { useAuthorization } from '../utils/useAuthorization';
 import { SignInFeature } from '../components/sign-in/sign-in-feature';
 import { TeamCard } from '../components/home/TeamCard';
@@ -8,10 +8,11 @@ import { ActionZone } from '../components/home/ActionZone';
 import { getAvatar } from '../lib/avatars';
 import { useMemoTransaction } from '../utils/useMemoTransaction';
 
-const TEAM_AVATAR = require('../../assets/avatars/you.png');
+const TEAM_AVATAR = require('../../assets/avatars/sleep-seekers.png');
+const THRIVV_LOGO = require('../../assets/thrivv-logo-bone.png');
 
 const MOCK_TEAM = {
-  teamName: 'The Sleep Lions',
+  teamName: 'Sleep Seekers',
   teamZzzs: 503,
   teamHours: 98,
   streakNights: 5,
@@ -57,8 +58,17 @@ export function HomeScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: '#0A0A0A' }}
-      contentContainerStyle={{ paddingTop: 8, paddingBottom: 16, gap: 10 }}
+      contentContainerStyle={{ paddingTop: 0, paddingBottom: 16, gap: 10 }}
     >
+      {/* Logo */}
+      <View style={{ paddingHorizontal: 16, marginBottom: 0, alignItems: 'center' }}>
+        <Image
+          source={THRIVV_LOGO}
+          style={{ width: 190, height: 59 }}
+          resizeMode="contain"
+        />
+      </View>
+
       {/* Section 1: Team Card */}
       <TeamCard
         teamName={MOCK_TEAM.teamName}
@@ -71,7 +81,7 @@ export function HomeScreen() {
 
       {/* Section 2: Teammate Cards */}
       <View className="bg-surface rounded-2xl mx-4" style={{ padding: 10 }}>
-        <View style={{ flexDirection: 'row', gap: 6 }}>
+        <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-end' }}>
           {MOCK_TEAMMATES.map(m => (
             <TeammateCard
               key={m.name}

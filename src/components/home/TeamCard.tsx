@@ -30,20 +30,25 @@ export function TeamCard({
   return (
     <View className="bg-surface rounded-2xl mx-4" style={{ padding: 12 }}>
       <View style={{ flexDirection: 'row' }}>
-        {/* Left: avatar with double ring */}
-        <ProgressRing
-          size={100}
-          innerProgress={hoursPct}
-          outerProgress={zzzsPct}
-          innerStroke={3}
-          outerStroke={5}
-          gap={5}
-        >
-          <Image
-            source={teamAvatar}
-            style={{ width: 62, height: 62, borderRadius: 31 }}
-          />
-        </ProgressRing>
+        {/* Left: avatar with double ring + hours label */}
+        <View style={{ alignItems: 'center' }}>
+          <ProgressRing
+            size={120}
+            innerProgress={hoursPct}
+            outerProgress={zzzsPct}
+            innerStroke={4}
+            outerStroke={6}
+            gap={6}
+          >
+            <Image
+              source={teamAvatar}
+              style={{ width: 74, height: 74, borderRadius: 37 }}
+            />
+          </ProgressRing>
+          <Text style={{ fontSize: 10, fontWeight: '500', color: '#B8D4C9', marginTop: 2 }}>
+            {teamHours}h / {MAX_HOURS_PER_WEEK_TEAM}h
+          </Text>
+        </View>
 
         {/* Right: stats */}
         <View style={{ flex: 1, marginLeft: 12, justifyContent: 'center' }}>
@@ -70,41 +75,41 @@ export function TeamCard({
             {weeklyPct}% of weekly target
           </Text>
 
-          {/* Streak pill */}
+          {/* Streak pill — dots + number */}
           <View style={{ flexDirection: 'row', marginTop: 8, alignItems: 'center' }}>
             <View
               style={{
                 flexDirection: 'row',
                 backgroundColor: '#5EBFB5',
-                borderRadius: 12,
-                paddingHorizontal: 10,
-                paddingVertical: 4,
+                borderRadius: 10,
+                paddingHorizontal: 8,
+                paddingVertical: 3,
                 alignItems: 'center',
-                gap: 6,
+                gap: 4,
               }}
             >
-              {DAYS.slice(0, filledDays).map((_, i) => (
+              {Array.from({ length: Math.max(streakNights - 1, 0) }).map((_, i) => (
                 <View
                   key={i}
                   style={{
-                    width: 8,
-                    height: 8,
-                    borderRadius: 4,
+                    width: 7,
+                    height: 7,
+                    borderRadius: 3.5,
                     backgroundColor: '#0A0A0A',
                   }}
                 />
               ))}
-              <Text style={{ fontSize: 11, fontWeight: '600', color: '#0A0A0A', marginLeft: 2 }}>
-                STREAK {streakNights} DAYS
+              <Text style={{ fontSize: 12, fontWeight: '700', color: '#0A0A0A' }}>
+                {streakNights}
               </Text>
             </View>
-            {DAYS.slice(filledDays).map((_, i) => (
+            {Array.from({ length: 7 - filledDays }).map((_, i) => (
               <View
                 key={i}
                 style={{
-                  width: 8,
-                  height: 8,
-                  borderRadius: 4,
+                  width: 7,
+                  height: 7,
+                  borderRadius: 3.5,
                   borderWidth: 1,
                   borderColor: '#5EBFB5',
                   marginLeft: 4,
