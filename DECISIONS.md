@@ -144,6 +144,14 @@ These are *settled* decisions — recorded so neither you nor Claude Code re-lit
 - **Leaderboards: computed at render time from on-chain data + Supabase profile join. Never cached.**
 - **ZZZ math: lives only in `programs/thrivv/src/lib.rs`. Mobile never computes scores.**
 
+
+- Anchor program: WRITTEN, NOT DEPLOYED for v1 demo. Rust toolchain
+  incompatibility (Rust 1.95 too new for anchor-syn 0.30.1; Rust 1.79
+  too old for edition2024 deps). Spec lib.rs preserved at
+  thrivv_app/programs/thrivv_app/src/lib.rs. v1 demo uses MWA-signed
+  memo transactions on devnet for the on-chain proof. Custom program
+  deployment deferred to post-hackathon.
+
 ---
 
 ## 10. Open questions / TODOs
