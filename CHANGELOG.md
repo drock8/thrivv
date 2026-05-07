@@ -2,6 +2,32 @@
 
 ## 2026-05-07
 
+### Step 8 — Leaderboard Screen
+
+**Goal:** Build the Leaderboard tab with 4 switchable views (Team ZZZs, Team Hours, Individual ZZZs, Individual Hours) using hardcoded mock data. All data consistent with ZZZ scoring formula.
+
+**Views:**
+- **Team ZZZs (default):** Sponsor strip (5 SOL pool by REM Labs), 10 teams with rank/avatar/ZZZs/bar/payout/stake. Sleep Seekers #3 highlighted with Glacier border.
+- **Team Hours:** 10 teams ranked by hours out of 147h cap. Sleep Seekers #4 highlighted.
+- **Individual ZZZs:** 12 top performers + divider + You at #43. Anatoly appears at #9.
+- **Individual Hours:** 12 top + divider + You at #67. Satoshi #9 and Anatoly #10 highlighted as teammates.
+
+**Features:**
+- 2x2 pill tab grid (active: bg-primary text-foreground, inactive: bg-surface text-muted)
+- THRIVV bone logo centered at top with spacing for future sponsor logos
+- SmartAvatar component: real PNGs for Sleep Seekers/Anatoly/Satoshi/You, Eucalyptus initial circles for all others
+- Rank badges: gold #1, silver #2, bronze #3, muted for rest
+- Bar fills showing relative progress
+- Glacier border + tint on "you" and teammate rows
+- Foundation footer on Team ZZZs view
+
+**Files modified:**
+- `src/screens/LeaderboardScreen.tsx` — Complete rewrite from placeholder stub
+
+**Status:** TypeScript compiles clean. All 4 tabs verified on device.
+
+---
+
 ### Step 7c — Correct Mock Data to Match ZZZ Scoring Formula
 
 **Goal:** Replace placeholder mock numbers with correctly calculated values using the nightZzzs() formula. Team streak = worst individual streak (was incorrectly 5, now 2).
