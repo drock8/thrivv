@@ -47,7 +47,7 @@ export function ProgressRing({
           strokeWidth={outerStroke}
           fill="none"
         />
-        {/* Outer progress */}
+        {/* Outer progress — starts at 12 o'clock */}
         <Circle
           cx={center}
           cy={center}
@@ -56,7 +56,7 @@ export function ProgressRing({
           strokeWidth={outerStroke}
           fill="none"
           strokeDasharray={`${outerDash} ${outerCircum - outerDash}`}
-          strokeDashoffset={outerCircum * 0.25}
+          strokeDashoffset={0}
           strokeLinecap="round"
           rotation={-90}
           origin={`${center}, ${center}`}
@@ -70,7 +70,7 @@ export function ProgressRing({
           strokeWidth={innerStroke}
           fill="none"
         />
-        {/* Inner progress */}
+        {/* Inner progress — starts at 12 o'clock */}
         <Circle
           cx={center}
           cy={center}
@@ -79,7 +79,7 @@ export function ProgressRing({
           strokeWidth={innerStroke}
           fill="none"
           strokeDasharray={`${innerDash} ${innerCircum - innerDash}`}
-          strokeDashoffset={innerCircum * 0.25}
+          strokeDashoffset={0}
           strokeLinecap="round"
           rotation={-90}
           origin={`${center}, ${center}`}

@@ -2,6 +2,41 @@
 
 ## 2026-05-07
 
+### Step 6b — Home Screen UX Polish Pass
+
+**Goal:** Visual polish and interaction fixes based on on-device review. No logic or data changes beyond sleep action flow.
+
+**Changes:**
+
+1. **Ring start position:** All SVG progress rings (ProgressRing + ActionZone countdown) now start at 12 o'clock instead of 9 o'clock. Fixed `strokeDashoffset` from `circumference * 0.25` to `0`.
+
+2. **Team streak pill:** Replaced 7 individual day-dot circles + "TEAM STREAK: X NIGHTS" text with a single merged Glacier pill capsule containing filled dots + "STREAK X DAYS" text inside. Unfilled days shown as small outlined dots after the pill.
+
+3. **"You" avatar sizing:** TeammateCard now renders "You" 10% larger (ring 99px, avatar 60px) and others 10% smaller (ring 81px, avatar 50px) for clear visual distinction.
+
+4. **Individual streak dots:** Shrunk from 20px to 12px. Removed "X NIGHT STREAK" text label — dots are self-evident.
+
+5. **Countdown ring wind-down:** Ring stays empty until within 3-hour wind-down window of target bedtime. Previously showed progress even 22+ hours out.
+
+6. **Sleep action flow rewrite:**
+   - "I'M GOING TO SLEEP" no longer triggers MWA transaction. Instead starts a sleep timer displayed in the center ring with animated dashed ring.
+   - "I'M WAKING UP" stops the timer and shows a confirmation modal ("Good Morning! You slept for Xh Xm") with "CONFIRM & LOG SLEEP" button.
+   - MWA memo transaction only fires on wake-up confirmation.
+   - Sleep start time persisted to AsyncStorage so timer survives app restart.
+
+7. **Fit on one screen:** Shrunk all sections — team card ring (140→100), avatar (90→62), score text (40→32), action zone ring (180→140), section gaps (16→10), padding reduced throughout.
+
+**Files modified:**
+- `src/components/home/ProgressRing.tsx`
+- `src/components/home/TeamCard.tsx`
+- `src/components/home/TeammateCard.tsx`
+- `src/components/home/ActionZone.tsx`
+- `src/screens/HomeScreen.tsx`
+
+**Status:** TypeScript compiles clean. Awaiting on-device verification.
+
+---
+
 ### Step 6 — Home Screen Shell (Dark Theme + Bottom Nav)
 
 **Goal:** Build the dark-themed Home Screen layout with 3 sections (Team card, Teammate cards, Action zone) + 3-tab bottom nav (Home/Leaderboard/Profile). Remove all template placeholder UI. Wire MWA memo signing into the action button.

@@ -9,7 +9,6 @@ import { getAvatar } from '../lib/avatars';
 import { useMemoTransaction } from '../utils/useMemoTransaction';
 
 const TEAM_AVATAR = require('../../assets/avatars/you.png');
-type SleepState = 'awake' | 'sleeping';
 
 const MOCK_TEAM = {
   teamName: 'The Sleep Lions',
@@ -29,21 +28,15 @@ export function HomeScreen() {
   const { selectedAccount } = useAuthorization();
   const memoMutation = useMemoTransaction();
 
-  const handleSleepAction = async (newState: SleepState) => {
+  const handleWakeConfirm = async () => {
     if (!selectedAccount) return;
     const pubkey = selectedAccount.publicKey.toBase58();
     const ts = new Date().toISOString();
-
-    let memo: string;
-    if (newState === 'sleeping') {
-      memo = `thrivv:start_night:user=${pubkey}:date=${ts}`;
-    } else {
-      memo = `thrivv:submit_night:user=${pubkey}:date=${ts}:hours=7.5:zzzs=24.0`;
-    }
+    const memo = `thrivv:submit_night:user=${pubkey}:date=${ts}:hours=7.5:zzzs=24.0`;
 
     const sig = await memoMutation.mutateAsync(memo);
     if (sig) {
-      Alert.alert('Transaction confirmed', sig.slice(0, 20) + '...');
+      Alert.alert('Sleep logged on-chain', sig.slice(0, 20) + '...');
     }
   };
 
@@ -64,7 +57,7 @@ export function HomeScreen() {
   return (
     <ScrollView
       style={{ flex: 1, backgroundColor: '#0A0A0A' }}
-      contentContainerStyle={{ paddingTop: 12, paddingBottom: 24, gap: 16 }}
+      contentContainerStyle={{ paddingTop: 8, paddingBottom: 16, gap: 10 }}
     >
       {/* Section 1: Team Card */}
       <TeamCard
@@ -77,8 +70,8 @@ export function HomeScreen() {
       />
 
       {/* Section 2: Teammate Cards */}
-      <View className="bg-surface rounded-2xl p-4 mx-4">
-        <View style={{ flexDirection: 'row', gap: 8 }}>
+      <View className="bg-surface rounded-2xl mx-4" style={{ padding: 10 }}>
+        <View style={{ flexDirection: 'row', gap: 6 }}>
           {MOCK_TEAMMATES.map(m => (
             <TeammateCard
               key={m.name}
@@ -94,7 +87,7 @@ export function HomeScreen() {
       </View>
 
       {/* Section 3: Action Zone */}
-      <ActionZone onSleepAction={handleSleepAction} />
+      <ActionZone onSleepAction={handleWakeConfirm} />
     </ScrollView>
   );
 }

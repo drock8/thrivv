@@ -28,85 +28,90 @@ export function TeamCard({
   const weeklyPct = Math.round(zzzsPct * 100);
 
   return (
-    <View className="bg-surface rounded-2xl p-4 mx-4">
+    <View className="bg-surface rounded-2xl mx-4" style={{ padding: 12 }}>
       <View style={{ flexDirection: 'row' }}>
         {/* Left: avatar with double ring */}
         <ProgressRing
-          size={140}
+          size={100}
           innerProgress={hoursPct}
           outerProgress={zzzsPct}
-          innerStroke={4}
-          outerStroke={6}
-          gap={8}
+          innerStroke={3}
+          outerStroke={5}
+          gap={5}
         >
           <Image
             source={teamAvatar}
-            style={{ width: 90, height: 90, borderRadius: 45 }}
+            style={{ width: 62, height: 62, borderRadius: 31 }}
           />
         </ProgressRing>
 
         {/* Right: stats */}
-        <View style={{ flex: 1, marginLeft: 16, justifyContent: 'center' }}>
+        <View style={{ flex: 1, marginLeft: 12, justifyContent: 'center' }}>
           <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-            <Text className="text-foreground" style={{ fontSize: 20, fontWeight: '500' }}>
+            <Text className="text-foreground" style={{ fontSize: 17, fontWeight: '500' }}>
               {teamName}
             </Text>
-            <Pencil size={14} color="#6B6760" style={{ marginLeft: 6 }} />
+            <Pencil size={12} color="#6B6760" style={{ marginLeft: 6 }} />
           </View>
 
-          <Text className="text-muted" style={{ fontSize: 11, fontWeight: '500', letterSpacing: 0.5, marginTop: 8, textTransform: 'uppercase' }}>
+          <Text className="text-muted" style={{ fontSize: 10, fontWeight: '500', letterSpacing: 0.5, marginTop: 4, textTransform: 'uppercase' }}>
             Team Score
           </Text>
           <View style={{ flexDirection: 'row', alignItems: 'baseline' }}>
-            <Text className="text-foreground" style={{ fontSize: 40, fontWeight: '500' }}>
+            <Text className="text-foreground" style={{ fontSize: 32, fontWeight: '500' }}>
               {teamZzzs}
             </Text>
-            <Text className="text-muted" style={{ fontSize: 18, marginLeft: 4 }}>
+            <Text className="text-muted" style={{ fontSize: 14, marginLeft: 4 }}>
               / {MAX_ZZZS_PER_WEEK_TEAM}
             </Text>
           </View>
 
-          <Text className="text-primary" style={{ fontSize: 13, marginTop: 2 }}>
+          <Text className="text-primary" style={{ fontSize: 12, marginTop: 1 }}>
             {weeklyPct}% of weekly target
           </Text>
 
-          {/* Day dots */}
-          <View style={{ flexDirection: 'row', marginTop: 10, gap: 6 }}>
-            {DAYS.map((day, i) => {
-              const filled = i < filledDays;
-              return (
+          {/* Streak pill */}
+          <View style={{ flexDirection: 'row', marginTop: 8, alignItems: 'center' }}>
+            <View
+              style={{
+                flexDirection: 'row',
+                backgroundColor: '#5EBFB5',
+                borderRadius: 12,
+                paddingHorizontal: 10,
+                paddingVertical: 4,
+                alignItems: 'center',
+                gap: 6,
+              }}
+            >
+              {DAYS.slice(0, filledDays).map((_, i) => (
                 <View
                   key={i}
                   style={{
-                    width: 28,
-                    height: 28,
-                    borderRadius: 14,
-                    backgroundColor: filled ? '#5EBFB5' : 'transparent',
-                    borderWidth: filled ? 0 : 1.5,
-                    borderColor: '#5EBFB5',
-                    borderStyle: filled ? 'solid' : 'dashed',
-                    alignItems: 'center',
-                    justifyContent: 'center',
+                    width: 8,
+                    height: 8,
+                    borderRadius: 4,
+                    backgroundColor: '#0A0A0A',
                   }}
-                >
-                  <Text
-                    style={{
-                      fontSize: 11,
-                      fontWeight: '500',
-                      color: filled ? '#0A0A0A' : '#5EBFB5',
-                    }}
-                  >
-                    {day}
-                  </Text>
-                </View>
-              );
-            })}
+                />
+              ))}
+              <Text style={{ fontSize: 11, fontWeight: '600', color: '#0A0A0A', marginLeft: 2 }}>
+                STREAK {streakNights} DAYS
+              </Text>
+            </View>
+            {DAYS.slice(filledDays).map((_, i) => (
+              <View
+                key={i}
+                style={{
+                  width: 8,
+                  height: 8,
+                  borderRadius: 4,
+                  borderWidth: 1,
+                  borderColor: '#5EBFB5',
+                  marginLeft: 4,
+                }}
+              />
+            ))}
           </View>
-
-          {/* Streak */}
-          <Text className="text-foreground" style={{ fontSize: 13, fontWeight: '500', marginTop: 10, letterSpacing: 0.5 }}>
-            TEAM STREAK: {streakNights} NIGHTS 🔥
-          </Text>
         </View>
       </View>
     </View>
