@@ -1,5 +1,45 @@
 # CHANGELOG
 
+## 2026-05-12
+
+### Step 9 — Profile Screen + Configurable Bedtime
+
+**Goal:** Replace the Profile tab placeholder with a full profile screen featuring avatar picker, configurable bedtime, and ZZZ scoring explainer. Extract bedtime into a shared store so ActionZone reads user-set bedtime instead of hardcoded 10:45 PM.
+
+**Files created:**
+- `src/lib/bedtimeStore.ts` — Shared bedtime store using AsyncStorage. Exports `useBedtime()` hook (returns `{hour, min}`, defaults to 22:45), `saveBedtime()` to persist changes, and an event-based `subscribe()` so multiple consumers stay in sync.
+
+**Files modified:**
+- `src/screens/ProfileScreen.tsx` — Complete rewrite from placeholder stub. Avatar picker (4 demo avatars with Glacier border on selected), bedtime adjuster (±15 min increments with ChevronUp/Down), and ZZZ scoring explainer with 4 scoring cards (Base Night Score, Tribe Multiplier, Streak Bonuses, Weekly Maximums) plus a "Putting It All Together" summary.
+- `src/components/home/ActionZone.tsx` — Replaced hardcoded `TARGET_BEDTIME_HOUR`/`TARGET_BEDTIME_MIN` with `useBedtime()` hook. Bedtime display now shows correct AM/PM based on user setting.
+
+**Also in this commit:**
+- Updated app icon (`assets/icon.png`) and iOS app icon
+- iOS project file changes for icon asset update
+
+---
+
+### Install Privy SDK + Expo peer dependencies
+
+**Goal:** Begin Privy Auth integration (Phase 1). Install `@privy-io/expo` and `@privy-io/expo-native-extensions` plus required Expo peer dependencies for OAuth flows, secure storage, and Apple Sign-In.
+
+**Packages added:**
+- `@privy-io/expo@^0.65.4` — Privy auth + embedded wallets for Expo
+- `@privy-io/expo-native-extensions@^0.0.11` — Native modules (biometrics, secure storage)
+- `expo-apple-authentication@~7.1.3` — Native Apple Sign-In
+- `expo-application@~6.0.2` — App metadata access
+- `expo-linking@~7.0.5` — Deep link handling
+- `expo-secure-store@~14.0.1` — Encrypted token persistence
+- `expo-web-browser@~14.0.2` — OAuth redirect flows
+- `react-native-webview@13.12.5` — In-app browser for OAuth
+
+**Config changes:**
+- `app.json` — Added `expo-secure-store` plugin
+
+**Note:** `react-native-passkeys` skipped — requires Expo 53+ (we're on 52). Passkey auth is optional and not needed for email OTP / Google / Apple login.
+
+---
+
 ## 2026-05-07
 
 ### Fix — Bedtime Countdown Timer Showing Wrong Time
