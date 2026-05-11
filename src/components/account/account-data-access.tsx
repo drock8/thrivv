@@ -12,7 +12,7 @@ import {
 import { TOKEN_2022_PROGRAM_ID, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useConnection } from "../../utils/ConnectionProvider";
-import { useMobileWallet } from "../../utils/useMobileWallet";
+import { usePrivyWallet } from "../../utils/usePrivyWallet";
 
 export function useGetBalance({ address }: { address: PublicKey }) {
   const { connection } = useConnection();
@@ -69,7 +69,7 @@ export function useGetTokenAccountBalance({ address }: { address: PublicKey }) {
 export function useTransferSol({ address }: { address: PublicKey }) {
   const { connection } = useConnection();
   const client = useQueryClient();
-  const wallet = useMobileWallet();
+  const { signAndSendTransaction } = usePrivyWallet();
 
   return useMutation({
     mutationKey: [
@@ -79,17 +79,15 @@ export function useTransferSol({ address }: { address: PublicKey }) {
     mutationFn: async (input: { destination: PublicKey; amount: number }) => {
       let signature: TransactionSignature = "";
       try {
-        const { transaction, latestBlockhash, minContextSlot } = await createTransaction({
+        const { transaction, latestBlockhash } = await createTransaction({
           publicKey: address,
           destination: input.destination,
           amount: input.amount,
           connection,
         });
 
-        // Send transaction and await for signature
-        signature = await wallet.signAndSendTransaction(transaction, minContextSlot);
+        signature = await signAndSendTransaction(transaction);
 
-        // Send transaction and await for signature
         await connection.confirmTransaction(
           { signature, ...latestBlockhash },
           "confirmed"
@@ -179,16 +177,10 @@ async function createTransaction({
 }): Promise<{
   transaction: VersionedTransaction;
   latestBlockhash: { blockhash: string; lastValidBlockHeight: number };
-  minContextSlot: number
 }> {
-  // Get the latest blockhash and slot to use in our transaction
-  const {
-    context: {slot: minContextSlot},
-    value: latestBlockhash
-  } = await connection.getLatestBlockhashAndContext();
+  const { value: latestBlockhash } =
+    await connection.getLatestBlockhashAndContext();
 
-
-  // Create instructions to send, in this case a simple transfer
   const instructions = [
     SystemProgram.transfer({
       fromPubkey: publicKey,
@@ -197,19 +189,16 @@ async function createTransaction({
     }),
   ];
 
-  // Create a new TransactionMessage with version and compile it to legacy
   const messageLegacy = new TransactionMessage({
     payerKey: publicKey,
     recentBlockhash: latestBlockhash.blockhash,
     instructions,
   }).compileToLegacyMessage();
 
-  // Create a new VersionedTransaction which supports legacy and v0
   const transaction = new VersionedTransaction(messageLegacy);
 
   return {
     transaction,
     latestBlockhash,
-    minContextSlot,
   };
 }

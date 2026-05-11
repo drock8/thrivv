@@ -16,7 +16,8 @@
     ],
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.solana.mobile.expo.template"
+      "bundleIdentifier": "com.solana.mobile.expo.template",
+      "usesAppleSignIn": true
     },
     "android": {
       "adaptiveIcon": {
@@ -31,7 +32,8 @@
     "plugins": [
       "expo-asset",
       "expo-font",
-      "expo-secure-store"
+      "expo-secure-store",
+      "expo-apple-authentication"
     ]
   }
 }

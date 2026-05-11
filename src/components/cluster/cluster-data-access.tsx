@@ -1,4 +1,3 @@
-import { WalletAdapterNetwork } from "@solana/wallet-adapter-base";
 import { clusterApiUrl } from "@solana/web3.js";
 import { createContext, ReactNode, useContext, useMemo, useState } from "react";
 
@@ -15,21 +14,6 @@ export enum ClusterNetwork {
   Devnet = "devnet",
   Custom = "custom",
 }
-export function toWalletAdapterNetwork(
-  cluster?: ClusterNetwork
-): WalletAdapterNetwork | undefined {
-  switch (cluster) {
-    case ClusterNetwork.Mainnet:
-      return WalletAdapterNetwork.Mainnet;
-    case ClusterNetwork.Testnet:
-      return WalletAdapterNetwork.Testnet;
-    case ClusterNetwork.Devnet:
-      return WalletAdapterNetwork.Devnet;
-    default:
-      return undefined;
-  }
-}
-
 export const defaultClusters: Readonly<Cluster[]> = [
   {
     name: "devnet",

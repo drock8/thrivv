@@ -1,12 +1,12 @@
 import { useState } from "react";
 import { View, Linking } from "react-native";
 import { Button, Text } from "react-native-paper";
-import { useAuthorization } from "../../utils/useAuthorization";
+import { useAuth } from "../../utils/useAuth";
 import { useMemoTransaction } from "../../utils/useMemoTransaction";
 import { alertAndLog } from "../../utils/alertAndLog";
 
 export function MemoTestButton() {
-  const { selectedAccount } = useAuthorization();
+  const { selectedAccount } = useAuth();
   const sendMemo = useMemoTransaction();
   const [lastSignature, setLastSignature] = useState<string | null>(null);
 

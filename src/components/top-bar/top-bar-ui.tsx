@@ -1,6 +1,6 @@
-import { Button, IconButton, Menu, useTheme } from "react-native-paper";
-import { Account, useAuthorization } from "../../utils/useAuthorization";
-import { useMobileWallet } from "../../utils/useMobileWallet";
+import { Button, IconButton, Menu } from "react-native-paper";
+import { Account, useAuth } from "../../utils/useAuth";
+import { usePrivyWallet } from "../../utils/usePrivyWallet";
 import { useNavigation } from "@react-navigation/native";
 import { ellipsify } from "../../utils/ellipsify";
 import { useState } from "react";
@@ -15,17 +15,16 @@ export function TopBarWalletButton({
   selectedAccount: Account | null;
   openMenu: () => void;
 }) {
-  const { connect } = useMobileWallet();
   return (
     <Button
       icon="wallet"
       mode="contained-tonal"
       style={{ alignSelf: "center" }}
-      onPress={selectedAccount ? openMenu : connect}
+      onPress={selectedAccount ? openMenu : undefined}
     >
       {selectedAccount
         ? ellipsify(selectedAccount.publicKey.toBase58())
-        : "Connect"}
+        : "No wallet"}
     </Button>
   );
 }
@@ -44,12 +43,11 @@ export function TopBarSettingsButton() {
 }
 
 export function TopBarWalletMenu() {
-  const { selectedAccount } = useAuthorization();
+  const { selectedAccount, logout } = useAuth();
   const { getExplorerUrl } = useCluster();
   const [visible, setVisible] = useState(false);
   const openMenu = () => setVisible(true);
   const closeMenu = () => setVisible(false);
-  const { disconnect } = useMobileWallet();
 
   const copyAddressToClipboard = async () => {
     if (selectedAccount) {
@@ -91,11 +89,11 @@ export function TopBarWalletMenu() {
       />
       <Menu.Item
         onPress={async () => {
-          await disconnect();
+          await logout();
           closeMenu();
         }}
-        title="Disconnect"
-        leadingIcon="link-off"
+        title="Sign out"
+        leadingIcon="logout"
       />
     </Menu>
   );

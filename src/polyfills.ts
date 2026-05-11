@@ -1,9 +1,12 @@
-import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
-import { Buffer } from "buffer";
+import "fast-text-encoding";
+import "react-native-get-random-values";
+import "@ethersproject/shims";
 
+import { Buffer } from "buffer";
 global.Buffer = Buffer;
 
-// getRandomValues polyfill
+import { getRandomValues as expoCryptoGetRandomValues } from "expo-crypto";
+
 class Crypto {
   getRandomValues = expoCryptoGetRandomValues;
 }

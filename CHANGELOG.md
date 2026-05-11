@@ -19,9 +19,9 @@
 
 ---
 
-### Install Privy SDK + Expo peer dependencies
+### Phase 1 — Privy Auth Integration (Replace MWA)
 
-**Goal:** Begin Privy Auth integration (Phase 1). Install `@privy-io/expo` and `@privy-io/expo-native-extensions` plus required Expo peer dependencies for OAuth flows, secure storage, and Apple Sign-In.
+**Goal:** Replace Mobile Wallet Adapter (MWA) auth with Privy, enabling email OTP + Google + Apple sign-in with an embedded Solana wallet auto-created for every user. No external wallet app required. Bridge Privy identity to Supabase via JWT exchange Edge Function.
 
 **Packages added:**
 - `@privy-io/expo@^0.65.4` — Privy auth + embedded wallets for Expo
@@ -32,9 +32,44 @@
 - `expo-secure-store@~14.0.1` — Encrypted token persistence
 - `expo-web-browser@~14.0.2` — OAuth redirect flows
 - `react-native-webview@13.12.5` — In-app browser for OAuth
+- `fast-text-encoding` — TextEncoder/TextDecoder polyfill
+- `react-native-get-random-values` — crypto.getRandomValues polyfill
+- `@ethersproject/shims` — ethers.js compatibility shims
+
+**Packages removed:**
+- `@solana-mobile/mobile-wallet-adapter-protocol`
+- `@solana-mobile/mobile-wallet-adapter-protocol-web3js`
+
+**Files created:**
+- `src/utils/useAuth.tsx` — Drop-in replacement for `useAuthorization`. Returns `{ isReady, authenticated, user, selectedAccount, wallet, logout }` using `usePrivy()` + `useEmbeddedSolanaWallet()`.
+- `src/utils/usePrivyWallet.tsx` — Drop-in replacement for `useMobileWallet`. Exposes `{ publicKey, signAndSendTransaction, signMessage }` via Privy's embedded wallet provider.
+- `src/lib/supabaseAuth.ts` — Client-side hook `useSupabaseWithPrivy()` that exchanges Privy access token for Supabase-compatible JWT via Edge Function.
+- `supabase/functions/privy-jwt-exchange/index.ts` — Deno Edge Function: verifies Privy JWT against JWKS, mints HS256 Supabase JWT with `sub = did:privy:...`, `role = authenticated`.
+
+**Files deleted:**
+- `src/utils/useMobileWallet.tsx` — Replaced by `usePrivyWallet.tsx`
+- `src/utils/useAuthorization.tsx` — Replaced by `useAuth.tsx`
 
 **Config changes:**
-- `app.json` — Added `expo-secure-store` plugin
+- `App.tsx` — Wrapped provider tree with `PrivyProvider` (outermost, configured for auto Solana wallet creation)
+- `src/polyfills.ts` — Added `fast-text-encoding`, `react-native-get-random-values`, `@ethersproject/shims` as first imports
+- `metro.config.js` — Added package export resolvers for `isows`, `zustand`, `jose`, `@privy-io/*`
+- `tsconfig.json` — Added `moduleResolution: "Bundler"`, excluded `supabase/` and `thrivv_app/`
+- `app.json` — Added `usesAppleSignIn: true`, `expo-apple-authentication` plugin, `expo-secure-store` plugin
+
+**Files migrated (MWA → Privy):**
+- `src/components/sign-in/sign-in-ui.tsx` — New login UI: email OTP form (send code → enter code → verify), Google + Apple OAuth buttons, "or" divider
+- `src/components/sign-in/sign-in-feature.tsx` — Updated layout: OAuth buttons first, then email
+- `src/screens/HomeScreen.tsx` — `useAuth()` with `isReady` loading gate
+- `src/components/top-bar/top-bar-ui.tsx` — `useAuth()` + `logout()` (replaces `disconnect()`)
+- `src/components/account/account-data-access.tsx` — `usePrivyWallet()` for transaction signing
+- `src/components/account/account-detail-feature.tsx` — `useAuth()`
+- `src/components/memo-test/MemoTestButton.tsx` — `useAuth()`
+- `src/screens/AccountScreen.tsx` — `useAuth()`
+- `src/utils/useMemoTransaction.tsx` — `usePrivyWallet()` for memo signing
+- `src/components/cluster/cluster-data-access.tsx` — Removed `@solana/wallet-adapter-base` import and unused `toWalletAdapterNetwork()`
+
+**Testing:** No Solana phone or external wallet app needed. Any iOS/Android device works. Requires Privy Dashboard configuration (enable Email/Google/Apple login methods, enable Solana embedded wallets, set URL scheme for OAuth redirects). Embedded wallet auto-created on first login. Devnet SOL airdrop needed before testing on-chain transactions.
 
 **Note:** `react-native-passkeys` skipped — requires Expo 53+ (we're on 52). Passkey auth is optional and not needed for email OTP / Google / Apple login.
 

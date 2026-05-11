@@ -5,6 +5,7 @@ import "./global.css";
 import { StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+import { PrivyProvider } from "@privy-io/expo";
 import { ConnectionProvider } from "./src/utils/ConnectionProvider";
 import { DemoClockProvider } from "./src/lib/demoClock";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -47,30 +48,42 @@ export default function App() {
     },
   };
   return (
-    <DemoClockProvider>
-      <QueryClientProvider client={queryClient}>
-        <ClusterProvider>
-          <ConnectionProvider config={{ commitment: "processed" }}>
-            <SafeAreaView
-              style={[
-                styles.shell,
-                { backgroundColor: '#0A0A0A' },
-              ]}
-            >
-              <PaperProvider
-                theme={
-                  colorScheme === "dark"
-                    ? CombinedDarkTheme
-                    : CombinedDefaultTheme
-                }
+    <PrivyProvider
+      appId={process.env.EXPO_PUBLIC_PRIVY_APP_ID!}
+      clientId={process.env.EXPO_PUBLIC_PRIVY_CLIENT_ID!}
+      config={{
+        embedded: {
+          solana: {
+            createOnLogin: "users-without-wallets",
+          },
+        },
+      }}
+    >
+      <DemoClockProvider>
+        <QueryClientProvider client={queryClient}>
+          <ClusterProvider>
+            <ConnectionProvider config={{ commitment: "processed" }}>
+              <SafeAreaView
+                style={[
+                  styles.shell,
+                  { backgroundColor: '#0A0A0A' },
+                ]}
               >
-                <AppNavigator />
-              </PaperProvider>
-            </SafeAreaView>
-          </ConnectionProvider>
-        </ClusterProvider>
-      </QueryClientProvider>
-    </DemoClockProvider>
+                <PaperProvider
+                  theme={
+                    colorScheme === "dark"
+                      ? CombinedDarkTheme
+                      : CombinedDefaultTheme
+                  }
+                >
+                  <AppNavigator />
+                </PaperProvider>
+              </SafeAreaView>
+            </ConnectionProvider>
+          </ClusterProvider>
+        </QueryClientProvider>
+      </DemoClockProvider>
+    </PrivyProvider>
   );
 }
 

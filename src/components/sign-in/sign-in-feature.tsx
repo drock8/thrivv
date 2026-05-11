@@ -1,20 +1,12 @@
-import { View, StyleSheet } from "react-native";
-import { ConnectButton, SignInButton } from "./sign-in-ui";
+import { View } from "react-native";
+import { EmailLoginForm, OAuthButtons, Divider } from "./sign-in-ui";
 
 export function SignInFeature() {
   return (
-    <>
-      <View style={styles.buttonGroup}>
-        <ConnectButton />
-        <SignInButton />
-      </View>
-    </>
+    <View style={{ width: "100%", gap: 16, paddingHorizontal: 8 }}>
+      <OAuthButtons />
+      <Divider />
+      <EmailLoginForm />
+    </View>
   );
 }
-
-const styles = StyleSheet.create({
-  buttonGroup: {
-    marginTop: 16,
-    flexDirection: "row",
-  },
-});

@@ -1,6 +1,6 @@
 import { View } from "react-native";
 import { useTheme } from "react-native-paper";
-import { useAuthorization } from "../../utils/useAuthorization";
+import { useAuth } from "../../utils/useAuth";
 import {
   AccountBalance,
   AccountButtonGroup,
@@ -8,7 +8,7 @@ import {
 } from "./account-ui";
 
 export function AccountDetailFeature() {
-  const { selectedAccount } = useAuthorization();
+  const { selectedAccount } = useAuth();
 
   if (!selectedAccount) {
     return null;

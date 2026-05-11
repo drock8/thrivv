@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ScrollView, View, Text, Image, Animated, TouchableOpacity, Linking, Alert, AppState } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useAuthorization } from '../utils/useAuthorization';
+import { useAuth } from '../utils/useAuth';
 import { SignInFeature } from '../components/sign-in/sign-in-feature';
 import { TeamCard } from '../components/home/TeamCard';
 import { TeammateCard } from '../components/home/TeammateCard';
@@ -40,7 +40,7 @@ function explorerUrl(sig: string) {
 }
 
 export function HomeScreen() {
-  const { selectedAccount } = useAuthorization();
+  const { selectedAccount, isReady } = useAuth();
   const memoMutation = useMemoTransaction();
 
   const [lastAttestation, setLastAttestation] = useState<Attestation | null>(null);
@@ -111,6 +111,14 @@ export function HomeScreen() {
     }
     return null;
   };
+
+  if (!isReady) {
+    return (
+      <View style={{ flex: 1, backgroundColor: '#0A0A0A', alignItems: 'center', justifyContent: 'center' }}>
+        <Text style={{ color: '#6B6760', fontSize: 16 }}>Loading...</Text>
+      </View>
+    );
+  }
 
   if (!selectedAccount) {
     return (
