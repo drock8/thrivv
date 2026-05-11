@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, ScrollView, TouchableOpacity, Image, ImageSourcePropType } from 'react-native';
+import { View, Text, ScrollView, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Camera, ChevronUp, ChevronDown, Moon, Zap, Users, Flame, Trophy, Star } from 'lucide-react-native';
+import * as Clipboard from 'expo-clipboard';
+import { Camera, ChevronUp, ChevronDown, Moon, Zap, Users, Flame, Trophy, Star, Wallet, LogOut, Copy } from 'lucide-react-native';
+import { useAuth } from '../utils/useAuth';
 import { useBedtime, saveBedtime } from '../lib/bedtimeStore';
 import {
   TARGET_HOURS,
@@ -35,7 +37,13 @@ function addMinutes(hour: number, min: number, delta: number): { hour: number; m
   return { hour: Math.floor(total / 60), min: total % 60 };
 }
 
+function ellipsify(str: string, maxLen = 12) {
+  if (str.length <= maxLen) return str;
+  return str.slice(0, 6) + '...' + str.slice(-4);
+}
+
 export function ProfileScreen() {
+  const { selectedAccount, user, logout } = useAuth();
   const bedtime = useBedtime();
   const [selectedAvatar, setSelectedAvatar] = useState('you');
   const [showPicker, setShowPicker] = useState(false);
@@ -101,6 +109,61 @@ export function ProfileScreen() {
               ))}
             </View>
           )}
+        </View>
+
+        {/* Wallet Address */}
+        {selectedAccount && (
+          <View style={{
+            backgroundColor: '#171717', borderRadius: 16, marginHorizontal: 16, padding: 20, marginBottom: 20,
+          }}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+              <Wallet size={20} color="#5EBFB5" />
+              <Text style={{ color: '#F5F2EA', fontSize: 16, fontWeight: '600', marginLeft: 10 }}>
+                Solana Wallet
+              </Text>
+            </View>
+            <TouchableOpacity
+              onPress={async () => {
+                await Clipboard.setStringAsync(selectedAccount.publicKey.toBase58());
+                Alert.alert('Copied', 'Wallet address copied to clipboard');
+              }}
+              activeOpacity={0.7}
+              style={{
+                backgroundColor: '#0A0A0A', borderRadius: 12, padding: 14,
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                borderWidth: 1, borderColor: '#2A2A2A',
+              }}
+            >
+              <Text style={{ color: '#F5F2EA', fontSize: 14, fontFamily: 'monospace' }}>
+                {ellipsify(selectedAccount.publicKey.toBase58(), 20)}
+              </Text>
+              <Copy size={16} color="#6B6760" />
+            </TouchableOpacity>
+            <Text style={{ color: '#6B6760', fontSize: 12, marginTop: 8 }}>
+              Tap to copy full address. Fund with devnet SOL for on-chain attestations.
+            </Text>
+          </View>
+        )}
+
+        {/* Sign Out */}
+        <View style={{ marginHorizontal: 16, marginBottom: 20 }}>
+          <TouchableOpacity
+            onPress={() => {
+              Alert.alert('Sign Out', 'Are you sure you want to sign out?', [
+                { text: 'Cancel', style: 'cancel' },
+                { text: 'Sign Out', style: 'destructive', onPress: logout },
+              ]);
+            }}
+            activeOpacity={0.8}
+            style={{
+              backgroundColor: '#171717', borderRadius: 12, padding: 16,
+              flexDirection: 'row', alignItems: 'center', justifyContent: 'center', gap: 10,
+              borderWidth: 1, borderColor: '#2A2A2A',
+            }}
+          >
+            <LogOut size={18} color="#C45A3D" />
+            <Text style={{ color: '#C45A3D', fontSize: 16, fontWeight: '500' }}>Sign Out</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Bedtime Setting */}

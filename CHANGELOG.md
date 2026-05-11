@@ -2,6 +2,19 @@
 
 ## 2026-05-12
 
+### Profile — Wallet Address Card + Sign Out
+
+**Goal:** Surface the Privy embedded wallet address in the Profile tab so users can view, copy, and fund their wallet. Add sign-out functionality.
+
+**Files modified:**
+- `src/screens/ProfileScreen.tsx` — Added Solana Wallet card (shows truncated address, tap to copy full address to clipboard), Sign Out button with confirmation alert. Imports `useAuth` for wallet/logout access and `expo-clipboard` for copy.
+
+**Also in this session:**
+- Fixed Privy runtime issues: added `thrivv` URL scheme to app.json, created `react-native-passkeys` shim for Expo 52 compat, installed `viem` transitive dependency, added error logging to email login form
+- Verified end-to-end: email OTP login → embedded wallet creation → on-chain memo attestation on devnet
+
+---
+
 ### Step 9 — Profile Screen + Configurable Bedtime
 
 **Goal:** Replace the Profile tab placeholder with a full profile screen featuring avatar picker, configurable bedtime, and ZZZ scoring explainer. Extract bedtime into a shared store so ActionZone reads user-set bedtime instead of hardcoded 10:45 PM.
