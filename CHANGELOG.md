@@ -2,6 +2,28 @@
 
 ## 2026-05-12
 
+### Biometric Verification Badge
+
+**Goal:** Add optional biometric identity verification in Profile settings. Verified users get a badge next to their name on leaderboards and team cards. Two tiers: standard biometric (teal) and hardware/Saga (gold).
+
+**Package installed:**
+- `expo-local-authentication` — Face ID, fingerprint, and device biometric APIs
+
+**Files created:**
+- `src/lib/biometricStore.ts` — Biometric state management using AsyncStorage. `enrollBiometric()` prompts for biometric auth and detects hardware tier (Saga/Seed Vault = `BIOMETRIC_STRONG`). `revokeBiometric()` clears verification. `useBiometricTier()` hook returns `'none' | 'biometric' | 'hardware'` with cross-component sync via listener pattern.
+- `src/components/VerifiedBadge.tsx` — Two components: `VerifiedBadge` (pill with shield icon + label, `sm`/`md` sizes) and `VerifiedBadgeInline` (small shield icon for inline use next to names). Teal for biometric, gold for hardware-verified.
+
+**Files modified:**
+- `app.json` — Added `expo-local-authentication` plugin with Face ID permission string.
+- `src/screens/ProfileScreen.tsx` — Added "Identity Verification" card with enable/disable toggle. Shows biometric prompt on enable, confirmation alert on success, revoke option when active. Badge appears next to "Your Profile" title.
+- `src/screens/HomeScreen.tsx` — Passes user's biometric tier to their TeammateCard via `verified` prop.
+- `src/components/home/TeammateCard.tsx` — New optional `verified` prop. Shows inline shield badge next to name when set.
+- `src/screens/LeaderboardScreen.tsx` — Individual leaderboard rows show verified badges next to names. Mock data includes sample verified users (hardware + biometric mix). User's own row reflects their real biometric state from `useBiometricTier()`.
+
+**Note:** Requires dev client rebuild (`npx expo run:android`) since `expo-local-authentication` is a native module.
+
+---
+
 ### Profile — Wallet Address Card + Sign Out
 
 **Goal:** Surface the Privy embedded wallet address in the Profile tab so users can view, copy, and fund their wallet. Add sign-out functionality.

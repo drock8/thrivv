@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import { View, Text, ScrollView, TouchableOpacity, Image, ImageSourcePropType, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as Clipboard from 'expo-clipboard';
-import { Camera, ChevronUp, ChevronDown, Moon, Zap, Users, Flame, Trophy, Star, Wallet, LogOut, Copy } from 'lucide-react-native';
+import { Camera, ChevronUp, ChevronDown, Moon, Zap, Users, Flame, Trophy, Star, Wallet, LogOut, Copy, ShieldCheck } from 'lucide-react-native';
 import { useAuth } from '../utils/useAuth';
 import { useBedtime, saveBedtime } from '../lib/bedtimeStore';
+import { useBiometricTier, enrollBiometric, revokeBiometric } from '../lib/biometricStore';
+import { VerifiedBadge } from '../components/VerifiedBadge';
 import {
   TARGET_HOURS,
   HOURS_CAP,
@@ -45,6 +47,7 @@ function ellipsify(str: string, maxLen = 12) {
 export function ProfileScreen() {
   const { selectedAccount, user, logout } = useAuth();
   const bedtime = useBedtime();
+  const biometricTier = useBiometricTier();
   const [selectedAvatar, setSelectedAvatar] = useState('you');
   const [showPicker, setShowPicker] = useState(false);
 
@@ -90,9 +93,12 @@ export function ProfileScreen() {
               <Camera size={16} color="#0A0A0A" />
             </View>
           </TouchableOpacity>
-          <Text style={{ color: '#F5F2EA', fontSize: 20, fontWeight: '600', marginTop: 14 }}>
-            Your Profile
-          </Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginTop: 14, gap: 8 }}>
+            <Text style={{ color: '#F5F2EA', fontSize: 20, fontWeight: '600' }}>
+              Your Profile
+            </Text>
+            <VerifiedBadge tier={biometricTier} size="md" />
+          </View>
 
           {/* Avatar picker */}
           {showPicker && (
@@ -164,6 +170,74 @@ export function ProfileScreen() {
             <LogOut size={18} color="#C45A3D" />
             <Text style={{ color: '#C45A3D', fontSize: 16, fontWeight: '500' }}>Sign Out</Text>
           </TouchableOpacity>
+        </View>
+
+        {/* Biometric Verification */}
+        <View style={{
+          backgroundColor: '#171717', borderRadius: 16, marginHorizontal: 16, padding: 20, marginBottom: 20,
+        }}>
+          <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+            <ShieldCheck size={20} color={biometricTier === 'hardware' ? '#FFD700' : '#5EBFB5'} />
+            <Text style={{ color: '#F5F2EA', fontSize: 16, fontWeight: '600', marginLeft: 10 }}>
+              Identity Verification
+            </Text>
+          </View>
+
+          {biometricTier === 'none' ? (
+            <>
+              <Text style={{ color: '#6B6760', fontSize: 13, lineHeight: 19, marginBottom: 14 }}>
+                Enable biometric verification to earn a verified badge on leaderboards and team cards. Saga / Seed Vault users get a special hardware-verified tier.
+              </Text>
+              <TouchableOpacity
+                onPress={async () => {
+                  const { success, tier } = await enrollBiometric();
+                  if (success) {
+                    const label = tier === 'hardware' ? 'Hardware Verified' : 'Biometric Verified';
+                    Alert.alert('Verified!', `You now have the "${label}" badge.`);
+                  } else {
+                    Alert.alert('Verification failed', 'Biometric authentication was not available or was cancelled.');
+                  }
+                }}
+                activeOpacity={0.8}
+                style={{
+                  backgroundColor: '#5EBFB5', borderRadius: 12, padding: 14,
+                  alignItems: 'center',
+                }}
+              >
+                <Text style={{ color: '#0A0A0A', fontSize: 15, fontWeight: '600' }}>
+                  Enable Biometric Verification
+                </Text>
+              </TouchableOpacity>
+            </>
+          ) : (
+            <>
+              <View style={{
+                backgroundColor: '#0A0A0A', borderRadius: 12, padding: 14, marginBottom: 12,
+                flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between',
+                borderWidth: 1, borderColor: biometricTier === 'hardware' ? '#FFD700' : '#5EBFB5',
+              }}>
+                <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                  <VerifiedBadge tier={biometricTier} size="md" />
+                  <Text style={{ color: '#F5F2EA', fontSize: 14 }}>
+                    {biometricTier === 'hardware' ? 'Hardware secured' : 'Biometric secured'}
+                  </Text>
+                </View>
+              </View>
+              <TouchableOpacity
+                onPress={() => {
+                  Alert.alert('Remove verification?', 'Your verified badge will be removed from leaderboards and team cards.', [
+                    { text: 'Cancel', style: 'cancel' },
+                    { text: 'Remove', style: 'destructive', onPress: revokeBiometric },
+                  ]);
+                }}
+                activeOpacity={0.8}
+              >
+                <Text style={{ color: '#6B6760', fontSize: 12, textAlign: 'center' }}>
+                  Remove verification
+                </Text>
+              </TouchableOpacity>
+            </>
+          )}
         </View>
 
         {/* Bedtime Setting */}

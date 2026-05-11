@@ -8,6 +8,7 @@ import { TeammateCard } from '../components/home/TeammateCard';
 import { ActionZone } from '../components/home/ActionZone';
 import { getAvatar } from '../lib/avatars';
 import { useMemoTransaction } from '../utils/useMemoTransaction';
+import { useBiometricTier } from '../lib/biometricStore';
 
 const TEAM_AVATAR = require('../../assets/avatars/sleep-seekers.png');
 const THRIVV_LOGO = require('../../assets/thrivv-logo-bone.png');
@@ -42,6 +43,7 @@ function explorerUrl(sig: string) {
 export function HomeScreen() {
   const { selectedAccount, isReady } = useAuth();
   const memoMutation = useMemoTransaction();
+  const biometricTier = useBiometricTier();
 
   const [lastAttestation, setLastAttestation] = useState<Attestation | null>(null);
   const [toast, setToast] = useState<{ hours: number; mins: number; zzzs: number; sig: string } | null>(null);
@@ -214,6 +216,7 @@ export function HomeScreen() {
                 zzzs={m.zzzs}
                 streakNights={m.streak}
                 isYou={m.isYou}
+                verified={m.isYou ? biometricTier : undefined}
               />
             ))}
           </View>

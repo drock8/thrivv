@@ -2,6 +2,9 @@ import React, { useState } from 'react';
 import { View, Text, ScrollView, Image, TouchableOpacity, ImageSourcePropType } from 'react-native';
 import { Trophy } from 'lucide-react-native';
 import { getAvatar } from '../lib/avatars';
+import { VerifiedBadgeInline } from '../components/VerifiedBadge';
+import { useBiometricTier } from '../lib/biometricStore';
+import type { BiometricTier } from '../lib/biometricStore';
 
 const THRIVV_LOGO = require('../../assets/thrivv-logo-bone.png');
 const SLEEP_SEEKERS_AVATAR = require('../../assets/avatars/sleep-seekers.png');
@@ -63,33 +66,33 @@ const TEAM_HOURS = [
   { rank: 10, name: 'Snooze Squad', hours: 28, isYou: false },
 ];
 
-const INDIVIDUAL_ZZZS_TOP = [
-  { rank: 1, name: 'Marcus Chen', zzzs: 412, tribe: 'Recovery Squad' },
-  { rank: 2, name: 'Priya Sharma', zzzs: 389, tribe: 'The Pillow Talkers' },
+const INDIVIDUAL_ZZZS_TOP: Array<{ rank: number; name: string; zzzs: number; tribe: string; verified?: BiometricTier }> = [
+  { rank: 1, name: 'Marcus Chen', zzzs: 412, tribe: 'Recovery Squad', verified: 'hardware' },
+  { rank: 2, name: 'Priya Sharma', zzzs: 389, tribe: 'The Pillow Talkers', verified: 'biometric' },
   { rank: 3, name: 'Jordan Lee', zzzs: 376, tribe: 'Recovery Squad' },
-  { rank: 4, name: 'Anya Volkov', zzzs: 351, tribe: 'The Pillow Talkers' },
+  { rank: 4, name: 'Anya Volkov', zzzs: 351, tribe: 'The Pillow Talkers', verified: 'biometric' },
   { rank: 5, name: 'David Kim', zzzs: 342, tribe: 'Dream Catchers' },
   { rank: 6, name: 'Lena Okoro', zzzs: 331, tribe: 'Night Owls' },
-  { rank: 7, name: 'Kai Tanaka', zzzs: 318, tribe: 'Circadian Crew' },
+  { rank: 7, name: 'Kai Tanaka', zzzs: 318, tribe: 'Circadian Crew', verified: 'hardware' },
   { rank: 8, name: 'Sofia Reyes', zzzs: 305, tribe: 'The Nappers' },
-  { rank: 9, name: 'Anatoly', zzzs: 298, tribe: 'Sleep Seekers' },
+  { rank: 9, name: 'Anatoly', zzzs: 298, tribe: 'Sleep Seekers', verified: 'biometric' },
   { rank: 10, name: 'Omar Hassan', zzzs: 287, tribe: 'REM Riders' },
   { rank: 11, name: 'Emma Wilson', zzzs: 274, tribe: 'Deep Sleepers' },
   { rank: 12, name: 'Ravi Patel', zzzs: 261, tribe: 'The Pillow Talkers' },
 ];
 const INDIVIDUAL_ZZZS_YOU = { rank: 43, name: 'You', zzzs: 53, tribe: 'Sleep Seekers' };
 
-const INDIVIDUAL_HOURS_TOP = [
-  { rank: 1, name: 'Anya Volkov', hours: 47, tribe: 'The Pillow Talkers', isTeammate: false },
-  { rank: 2, name: 'Marcus Chen', hours: 46, tribe: 'Recovery Squad', isTeammate: false },
+const INDIVIDUAL_HOURS_TOP: Array<{ rank: number; name: string; hours: number; tribe: string; isTeammate: boolean; verified?: BiometricTier }> = [
+  { rank: 1, name: 'Anya Volkov', hours: 47, tribe: 'The Pillow Talkers', isTeammate: false, verified: 'biometric' },
+  { rank: 2, name: 'Marcus Chen', hours: 46, tribe: 'Recovery Squad', isTeammate: false, verified: 'hardware' },
   { rank: 3, name: 'David Kim', hours: 44, tribe: 'Dream Catchers', isTeammate: false },
   { rank: 4, name: 'Lena Okoro', hours: 43, tribe: 'Night Owls', isTeammate: false },
   { rank: 5, name: 'Jordan Lee', hours: 42, tribe: 'Recovery Squad', isTeammate: false },
-  { rank: 6, name: 'Kai Tanaka', hours: 40, tribe: 'Circadian Crew', isTeammate: false },
-  { rank: 7, name: 'Priya Sharma', hours: 38, tribe: 'The Pillow Talkers', isTeammate: false },
+  { rank: 6, name: 'Kai Tanaka', hours: 40, tribe: 'Circadian Crew', isTeammate: false, verified: 'hardware' },
+  { rank: 7, name: 'Priya Sharma', hours: 38, tribe: 'The Pillow Talkers', isTeammate: false, verified: 'biometric' },
   { rank: 8, name: 'Sofia Reyes', hours: 35, tribe: 'The Nappers', isTeammate: false },
   { rank: 9, name: 'Satoshi', hours: 28, tribe: 'Sleep Seekers', isTeammate: true },
-  { rank: 10, name: 'Anatoly', hours: 26, tribe: 'Sleep Seekers', isTeammate: true },
+  { rank: 10, name: 'Anatoly', hours: 26, tribe: 'Sleep Seekers', isTeammate: true, verified: 'biometric' },
   { rank: 11, name: 'Omar Hassan', hours: 25, tribe: 'REM Riders', isTeammate: false },
   { rank: 12, name: 'Emma Wilson', hours: 24, tribe: 'Deep Sleepers', isTeammate: false },
 ];
@@ -116,6 +119,7 @@ function BarFill({ value, max, color = '#5EBFB5' }: { value: number; max: number
 
 export function LeaderboardScreen() {
   const [tab, setTab] = useState<Tab>('teamZzzs');
+  const myBiometricTier = useBiometricTier();
 
   return (
     <ScrollView
@@ -186,8 +190,8 @@ export function LeaderboardScreen() {
       {/* Content */}
       {tab === 'teamZzzs' && <TeamZzzsView />}
       {tab === 'teamHours' && <TeamHoursView />}
-      {tab === 'individualZzzs' && <IndividualZzzsView />}
-      {tab === 'individualHours' && <IndividualHoursView />}
+      {tab === 'individualZzzs' && <IndividualZzzsView myTier={myBiometricTier} />}
+      {tab === 'individualHours' && <IndividualHoursView myTier={myBiometricTier} />}
     </ScrollView>
   );
 }
@@ -311,7 +315,7 @@ function TeamHoursView() {
   );
 }
 
-function IndividualZzzsView() {
+function IndividualZzzsView({ myTier }: { myTier: BiometricTier }) {
   const maxZzzs = INDIVIDUAL_ZZZS_TOP[0].zzzs;
   return (
     <View style={{ paddingHorizontal: 16 }}>
@@ -336,7 +340,10 @@ function IndividualZzzsView() {
             <SmartAvatar name={row.name} size={28} teamName={row.tribe} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: '#F5F2EA', fontSize: 12, fontWeight: '500' }}>{row.name}</Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ color: '#F5F2EA', fontSize: 12, fontWeight: '500' }}>{row.name}</Text>
+              {row.verified && <VerifiedBadgeInline tier={row.verified} />}
+            </View>
             <Text style={{ color: '#6B6760', fontSize: 10 }}>{row.tribe}</Text>
           </View>
           <View style={{ width: 75, alignItems: 'flex-end' }}>
@@ -369,7 +376,10 @@ function IndividualZzzsView() {
           <SmartAvatar name={INDIVIDUAL_ZZZS_YOU.name} size={28} teamName={INDIVIDUAL_ZZZS_YOU.tribe} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>{INDIVIDUAL_ZZZS_YOU.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>{INDIVIDUAL_ZZZS_YOU.name}</Text>
+            {myTier !== 'none' && <VerifiedBadgeInline tier={myTier} />}
+          </View>
           <Text style={{ color: '#6B6760', fontSize: 10 }}>{INDIVIDUAL_ZZZS_YOU.tribe}</Text>
         </View>
         <View style={{ width: 75, alignItems: 'flex-end' }}>
@@ -381,7 +391,7 @@ function IndividualZzzsView() {
   );
 }
 
-function IndividualHoursView() {
+function IndividualHoursView({ myTier }: { myTier: BiometricTier }) {
   const maxHours = 49;
   return (
     <View style={{ paddingHorizontal: 16 }}>
@@ -409,9 +419,12 @@ function IndividualHoursView() {
             <SmartAvatar name={row.name} size={28} teamName={row.tribe} />
           </View>
           <View style={{ flex: 1 }}>
-            <Text style={{ color: row.isTeammate ? '#5EBFB5' : '#F5F2EA', fontSize: 12, fontWeight: '500' }}>
-              {row.name}
-            </Text>
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+              <Text style={{ color: row.isTeammate ? '#5EBFB5' : '#F5F2EA', fontSize: 12, fontWeight: '500' }}>
+                {row.name}
+              </Text>
+              {row.verified && <VerifiedBadgeInline tier={row.verified} />}
+            </View>
             <Text style={{ color: '#6B6760', fontSize: 10 }}>{row.tribe}</Text>
           </View>
           <View style={{ width: 50, alignItems: 'flex-end' }}>
@@ -444,7 +457,10 @@ function IndividualHoursView() {
           <SmartAvatar name={INDIVIDUAL_HOURS_YOU.name} size={28} teamName={INDIVIDUAL_HOURS_YOU.tribe} />
         </View>
         <View style={{ flex: 1 }}>
-          <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>{INDIVIDUAL_HOURS_YOU.name}</Text>
+          <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>{INDIVIDUAL_HOURS_YOU.name}</Text>
+            {myTier !== 'none' && <VerifiedBadgeInline tier={myTier} />}
+          </View>
           <Text style={{ color: '#6B6760', fontSize: 10 }}>{INDIVIDUAL_HOURS_YOU.tribe}</Text>
         </View>
         <View style={{ width: 50, alignItems: 'flex-end' }}>

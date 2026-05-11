@@ -2,6 +2,8 @@ import React from 'react';
 import { View, Text, Image, ImageSourcePropType } from 'react-native';
 import { ProgressRing } from './ProgressRing';
 import { MAX_HOURS_PER_WEEK_INDIVIDUAL, MAX_ZZZS_PER_WEEK_INDIVIDUAL } from '../../lib/zzzScoring';
+import { VerifiedBadgeInline } from '../VerifiedBadge';
+import type { BiometricTier } from '../../lib/biometricStore';
 
 type Props = {
   name: string;
@@ -10,9 +12,10 @@ type Props = {
   zzzs: number;
   streakNights: number;
   isYou?: boolean;
+  verified?: BiometricTier;
 };
 
-export function TeammateCard({ name, avatar, hours, zzzs, streakNights, isYou }: Props) {
+export function TeammateCard({ name, avatar, hours, zzzs, streakNights, isYou, verified }: Props) {
   const hoursPct = hours / MAX_HOURS_PER_WEEK_INDIVIDUAL;
   const zzzsPct = zzzs / MAX_ZZZS_PER_WEEK_INDIVIDUAL;
   const outerPctDisplay = Math.round(zzzsPct * 100);
@@ -26,16 +29,18 @@ export function TeammateCard({ name, avatar, hours, zzzs, streakNights, isYou }:
   return (
     <View style={{ flex: 1, alignItems: 'center' }}>
       {/* Name */}
-      <Text
-        style={{
-          fontSize: isYou ? 14 : 12,
-          fontWeight: '500',
-          color: isYou ? '#5EBFB5' : '#F5F2EA',
-          marginBottom: 4,
-        }}
-      >
-        {name}
-      </Text>
+      <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 4 }}>
+        <Text
+          style={{
+            fontSize: isYou ? 14 : 12,
+            fontWeight: '500',
+            color: isYou ? '#5EBFB5' : '#F5F2EA',
+          }}
+        >
+          {name}
+        </Text>
+        {verified && <VerifiedBadgeInline tier={verified} />}
+      </View>
 
       {/* Avatar with double ring */}
       <ProgressRing
