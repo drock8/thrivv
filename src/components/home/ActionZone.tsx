@@ -3,11 +3,10 @@ import { View, Text, TouchableOpacity, ActivityIndicator, Modal } from 'react-na
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import Svg, { Circle } from 'react-native-svg';
 import { Moon, Sun, Flame, Activity, Clock, TrendingUp } from 'lucide-react-native';
+import { useBedtime } from '../../lib/bedtimeStore';
 
 const SLEEP_STATE_KEY = 'thrivv.sleep.state';
 const SLEEP_START_KEY = 'thrivv.sleep.startTime';
-const TARGET_BEDTIME_HOUR = 22;
-const TARGET_BEDTIME_MIN = 45;
 const WIND_DOWN_HOURS = 3;
 
 function useRealTime(): Date {
@@ -27,6 +26,7 @@ type Props = {
 
 export function ActionZone({ onWakeConfirm }: Props) {
   const now = useRealTime();
+  const bedtimeSetting = useBedtime();
   const [sleepState, setSleepState] = useState<SleepState>('awake');
   const [sleepStartMs, setSleepStartMs] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -79,9 +79,8 @@ export function ActionZone({ onWakeConfirm }: Props) {
     }
   };
 
-  // Countdown calc using demo clock
   const bedtime = new Date(now);
-  bedtime.setHours(TARGET_BEDTIME_HOUR, TARGET_BEDTIME_MIN, 0, 0);
+  bedtime.setHours(bedtimeSetting.hour, bedtimeSetting.min, 0, 0);
   if (bedtime.getTime() <= now.getTime()) {
     bedtime.setDate(bedtime.getDate() + 1);
   }
@@ -117,7 +116,9 @@ export function ActionZone({ onWakeConfirm }: Props) {
   const circumference = 2 * Math.PI * radius;
   const dashLen = circumference * ringProgress;
 
-  const bedtimeStr = `${TARGET_BEDTIME_HOUR > 12 ? TARGET_BEDTIME_HOUR - 12 : TARGET_BEDTIME_HOUR}:${String(TARGET_BEDTIME_MIN).padStart(2, '0')} PM`;
+  const displayHour = bedtimeSetting.hour > 12 ? bedtimeSetting.hour - 12 : bedtimeSetting.hour === 0 ? 12 : bedtimeSetting.hour;
+  const amPm = bedtimeSetting.hour >= 12 ? 'PM' : 'AM';
+  const bedtimeStr = `${displayHour}:${String(bedtimeSetting.min).padStart(2, '0')} ${amPm}`;
 
   if (!loaded) return null;
 
