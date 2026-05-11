@@ -2,6 +2,7 @@
   "expo": {
     "name": "thrivv-v2",
     "slug": "thrivv-v2",
+    "scheme": "thrivv",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",

@@ -12,7 +12,21 @@ import { useLoginWithEmail, useLoginWithOAuth } from "@privy-io/expo";
 export function EmailLoginForm() {
   const [email, setEmail] = useState("");
   const [code, setCode] = useState("");
-  const { sendCode, loginWithCode, state } = useLoginWithEmail();
+  const [errorMsg, setErrorMsg] = useState("");
+  const { sendCode, loginWithCode, state } = useLoginWithEmail({
+    onSendCodeSuccess() {
+      console.log("[Privy] OTP code sent successfully");
+      setErrorMsg("");
+    },
+    onLoginSuccess(user) {
+      console.log("[Privy] Login success:", user.id);
+      setErrorMsg("");
+    },
+    onError(err) {
+      console.error("[Privy] Auth error:", JSON.stringify(err));
+      setErrorMsg(err?.message || JSON.stringify(err));
+    },
+  });
 
   const awaitingCode =
     state.status === "awaiting-code-input" ||
@@ -20,12 +34,24 @@ export function EmailLoginForm() {
 
   const handleSendCode = async () => {
     if (!email.trim()) return;
-    await sendCode({ email: email.trim() });
+    setErrorMsg("");
+    try {
+      await sendCode({ email: email.trim() });
+    } catch (e: any) {
+      console.error("[Privy] sendCode error:", e);
+      setErrorMsg(e?.message || String(e));
+    }
   };
 
   const handleVerify = async () => {
     if (!code.trim()) return;
-    await loginWithCode({ code: code.trim(), email: email.trim() });
+    setErrorMsg("");
+    try {
+      await loginWithCode({ code: code.trim(), email: email.trim() });
+    } catch (e: any) {
+      console.error("[Privy] loginWithCode error:", e);
+      setErrorMsg(e?.message || String(e));
+    }
   };
 
   return (
@@ -143,7 +169,7 @@ export function EmailLoginForm() {
         </>
       )}
 
-      {state.status === "error" && (
+      {(state.status === "error" || errorMsg) && (
         <Text
           style={{
             color: "#C45A3D",
@@ -151,7 +177,7 @@ export function EmailLoginForm() {
             textAlign: "center",
           }}
         >
-          Something went wrong. Please try again.
+          {errorMsg || "Something went wrong. Please try again."}
         </Text>
       )}
     </View>
