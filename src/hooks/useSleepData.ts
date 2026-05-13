@@ -248,6 +248,7 @@ function useTeamWeeklySleepInline(pubkeys: string[]) {
 export type LeaderboardTeamZzzsRow = {
   rank: number;
   name: string;
+  avatarUrl: string | null;
   zzzs: number;
   payout: string | null;
   stake: string;
@@ -258,6 +259,7 @@ export type LeaderboardTeamZzzsRow = {
 export type LeaderboardTeamHoursRow = {
   rank: number;
   name: string;
+  avatarUrl: string | null;
   hours: number;
   isYou: boolean;
   isSeed: boolean;
@@ -295,6 +297,7 @@ export function useLeaderboardData(pubkey: string | undefined) {
     .map((row, i) => ({
       rank: i + 1,
       name: row.team_name,
+      avatarUrl: row.team_avatar_url ?? null,
       zzzs: Math.round(row.total_zzzs),
       payout: payoutTiers[i + 1] ?? null,
       stake: "0.3 SOL",
@@ -307,6 +310,7 @@ export function useLeaderboardData(pubkey: string | undefined) {
     .map((row, i) => ({
       rank: i + 1,
       name: row.team_name,
+      avatarUrl: row.team_avatar_url ?? null,
       hours: Math.round(row.total_hours),
       isYou: row.team_pda === myTeamPda,
       isSeed: row.is_seed,

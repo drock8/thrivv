@@ -2,6 +2,38 @@
 
 ## 2026-05-13
 
+### Leaderboard Bug Fixes + Time-Relative Progress Bars
+
+**Goal:** Fix 5 rendering bugs across all 4 leaderboard tabs and implement time-relative progress bar scaling based on the THRIVV ZZZ Points System scoring table.
+
+**Bugs fixed:**
+1. **Active member count inflated** — `getTotalActiveMembers()` counted sleep record rows instead of distinct pubkeys. A user with 5 records counted as 5 members. Now uses `Set` for deduplication.
+2. **Team avatars missing in leaderboard** — Team ZZZs and Team Hours views only showed initial letters. Added `avatarUrl` field to `LeaderboardTeamZzzsRow` and `LeaderboardTeamHoursRow` types, piped `team_avatar_url` through from the data layer.
+3. **SVG avatar URLs not rendering** — Legacy DiceBear SVG URLs don't render in React Native `<Image>`. Added `normalizeDiceBearUrl()` to `SmartAvatar` that converts `/svg?` → `/png?`.
+4. **Individual progress bars invisible** — `BarFill` (uses `flex: 1` width) was inside a fixed-width `View` with `alignItems: 'flex-end'`, giving the bar zero width. Moved bars into the `flex: 1` name/tribe column.
+5. **Empty states missing on individual tabs** — Individual ZZZs and Hours showed blank space when no data. Added "No sleep data this week yet" message.
+
+**Progress bar scaling (new):**
+- Bars now fill relative to the maximum score achievable by that point in the week, not relative to the current leader or a fixed weekly cap.
+- Scoring accounts for streak bonuses (+10 at 3 nights, +25 at 5 nights) and the 7-night 2x multiplier.
+- Cumulative max lookup tables in `zzzScoring.ts` match the THRIVV ZZZ Points System spreadsheet:
+  - Individual: [0, 24, 48, 102, 126, 225, 249, 550] (day 7 includes 2x streak + 4 bonus)
+  - Team: [0, 72, 144, 306, 378, 675, 747, 1650] (individual × 3 members)
+  - Hours: 7h × nights completed (individual), × 3 (team)
+
+**Scoring constants updated:**
+- `MAX_ZZZS_PER_WEEK_INDIVIDUAL`: 225 → 550
+- `MAX_ZZZS_PER_WEEK_TEAM`: 675 → 1650
+
+**Files modified:**
+- `src/lib/sleepRecords.ts` — `getTotalActiveMembers()` distinct count fix
+- `src/lib/weekUtils.ts` — Added `getNightsCompletedThisWeek()` (Mon=1 ... Sun=7)
+- `src/lib/zzzScoring.ts` — Added cumulative max lookup tables and accessor functions, updated weekly max constants
+- `src/hooks/useSleepData.ts` — Added `avatarUrl` to team leaderboard row types
+- `src/screens/LeaderboardScreen.tsx` — All 5 bug fixes + time-relative bar max calculations
+
+---
+
 ### Replace Mock Data with Supabase-Backed Data
 
 **Goal:** Remove all hardcoded mock/demo data from HomeScreen and LeaderboardScreen. Wire up real Supabase queries for teams, sleep records, and leaderboards. Add team creation/join flow with invite codes. Persist sleep records via dual-write (Supabase + on-chain attestation).

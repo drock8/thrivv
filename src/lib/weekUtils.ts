@@ -20,3 +20,8 @@ export function getWeekStartForDate(date: Date): string {
 export function getTodayDate(): string {
   return new Date().toISOString().split("T")[0];
 }
+
+export function getNightsCompletedThisWeek(): number {
+  const day = new Date().getUTCDay();
+  return day === 0 ? 7 : day;
+}

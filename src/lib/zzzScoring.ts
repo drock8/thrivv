@@ -8,8 +8,32 @@ export const STREAK_7_NIGHT_MULTIPLIER = 2;
 
 export const MAX_HOURS_PER_WEEK_INDIVIDUAL = 49;
 export const MAX_HOURS_PER_WEEK_TEAM = 147;
-export const MAX_ZZZS_PER_WEEK_INDIVIDUAL = 225;
-export const MAX_ZZZS_PER_WEEK_TEAM = 675;
+export const MAX_ZZZS_PER_WEEK_INDIVIDUAL = 550;
+export const MAX_ZZZS_PER_WEEK_TEAM = 1650;
+
+// Cumulative max ZZZs by nights completed (index 0 = 0 nights, 1 = 1 night, etc.)
+// Streak bonuses: +10 at 3 nights, +25 at 5 nights
+// 7-night streak: 2x multiplier + 4 bonus → 550 individual, ×3 → 1650 team
+const CUMULATIVE_MAX_INDIVIDUAL_ZZZS = [0, 24, 48, 102, 126, 225, 249, 550];
+const CUMULATIVE_MAX_TEAM_ZZZS = [0, 72, 144, 306, 378, 675, 747, 1650];
+
+export function getMaxIndividualZzzs(nightsCompleted: number): number {
+  const n = Math.max(0, Math.min(nightsCompleted, 7));
+  return CUMULATIVE_MAX_INDIVIDUAL_ZZZS[n];
+}
+
+export function getMaxTeamZzzs(nightsCompleted: number): number {
+  const n = Math.max(0, Math.min(nightsCompleted, 7));
+  return CUMULATIVE_MAX_TEAM_ZZZS[n];
+}
+
+export function getMaxIndividualHours(nightsCompleted: number): number {
+  return HOURS_CAP * Math.max(0, Math.min(nightsCompleted, 7));
+}
+
+export function getMaxTeamHours(nightsCompleted: number): number {
+  return HOURS_CAP * Math.max(0, Math.min(nightsCompleted, 7)) * 3;
+}
 
 export function nightZzzs(actualHours: number, allTribeHit: boolean) {
   const capped = Math.min(actualHours, HOURS_CAP);

@@ -6,6 +6,13 @@ import { VerifiedBadgeInline } from '../components/VerifiedBadge';
 import { useBiometricTier } from '../lib/biometricStore';
 import type { BiometricTier } from '../lib/biometricStore';
 import { useAuth } from '../utils/useAuth';
+import { getNightsCompletedThisWeek } from '../lib/weekUtils';
+import {
+  getMaxIndividualZzzs,
+  getMaxTeamZzzs,
+  getMaxIndividualHours,
+  getMaxTeamHours,
+} from '../lib/zzzScoring';
 import {
   useLeaderboardData,
   type LeaderboardTeamZzzsRow,
@@ -28,10 +35,14 @@ function InitialAvatar({ name, size = 32 }: { name: string; size?: number }) {
   );
 }
 
+function normalizeDiceBearUrl(url: string): string {
+  return url.replace('/svg?', '/png?');
+}
+
 function SmartAvatar({ name, size = 32, avatarUrl }: { name: string; size?: number; avatarUrl?: string | null }) {
   const bundled = getAvatar(name.toLowerCase());
   if (bundled) return <Image source={bundled} style={{ width: size, height: size, borderRadius: size / 2 }} />;
-  if (avatarUrl) return <Image source={{ uri: avatarUrl }} style={{ width: size, height: size, borderRadius: size / 2 }} />;
+  if (avatarUrl) return <Image source={{ uri: normalizeDiceBearUrl(avatarUrl) }} style={{ width: size, height: size, borderRadius: size / 2 }} />;
   return <InitialAvatar name={name} size={size} />;
 }
 
@@ -191,7 +202,7 @@ export function LeaderboardScreen() {
 }
 
 function TeamZzzsView({ data }: { data: LeaderboardTeamZzzsRow[] }) {
-  const maxZzzs = data.length > 0 ? data[0].zzzs : 1;
+  const maxZzzs = getMaxTeamZzzs(getNightsCompletedThisWeek()) || 1;
   return (
     <View style={{ paddingHorizontal: 16 }}>
       {/* Sponsor strip */}
@@ -243,7 +254,7 @@ function TeamZzzsView({ data }: { data: LeaderboardTeamZzzsRow[] }) {
           >
             <RankBadge rank={row.rank} />
             <View style={{ marginRight: 8 }}>
-              <SmartAvatar name={row.name} size={28} />
+              <SmartAvatar name={row.name} size={28} avatarUrl={row.avatarUrl} />
             </View>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -275,7 +286,7 @@ function TeamZzzsView({ data }: { data: LeaderboardTeamZzzsRow[] }) {
 }
 
 function TeamHoursView({ data }: { data: LeaderboardTeamHoursRow[] }) {
-  const maxHours = 147;
+  const maxHours = getMaxTeamHours(getNightsCompletedThisWeek()) || 1;
   return (
     <View style={{ paddingHorizontal: 16 }}>
       <Text style={{ color: '#6B6760', fontSize: 12, fontWeight: '500', marginBottom: 12 }}>
@@ -304,7 +315,7 @@ function TeamHoursView({ data }: { data: LeaderboardTeamHoursRow[] }) {
           >
             <RankBadge rank={row.rank} />
             <View style={{ marginRight: 8 }}>
-              <SmartAvatar name={row.name} size={28} />
+              <SmartAvatar name={row.name} size={28} avatarUrl={row.avatarUrl} />
             </View>
             <View style={{ flex: 1 }}>
               <View style={{ flexDirection: 'row', alignItems: 'center' }}>
@@ -336,14 +347,18 @@ function IndividualZzzsView({
   myTier: BiometricTier;
   totalMembers: number;
 }) {
-  const maxZzzs = top.length > 0 ? (top[0].zzzs ?? 1) : 1;
+  const maxZzzs = getMaxIndividualZzzs(getNightsCompletedThisWeek()) || 1;
   return (
     <View style={{ paddingHorizontal: 16 }}>
       <Text style={{ color: '#6B6760', fontSize: 12, fontWeight: '500', marginBottom: 12 }}>
         Top performers across THRIVV · {totalMembers} active member{totalMembers !== 1 ? 's' : ''}
       </Text>
 
-      {top.map(row => (
+      {top.length === 0 ? (
+        <Text style={{ color: '#6B6760', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>
+          No sleep data this week yet
+        </Text>
+      ) : top.map(row => (
         <View
           key={row.rank}
           style={{
@@ -366,11 +381,11 @@ function IndividualZzzsView({
               {row.isSeed && <SeedBadge />}
             </View>
             <Text style={{ color: '#6B6760', fontSize: 10 }}>{row.tribe}</Text>
-          </View>
-          <View style={{ width: 75, alignItems: 'flex-end' }}>
-            <Text style={{ color: '#F5F2EA', fontSize: 11, fontWeight: '500' }}>{row.zzzs} ZZZs</Text>
             <BarFill value={row.zzzs ?? 0} max={maxZzzs} />
           </View>
+          <Text style={{ width: 55, color: '#F5F2EA', fontSize: 11, fontWeight: '500', textAlign: 'right' }}>
+            {row.zzzs} ZZZs
+          </Text>
         </View>
       ))}
 
@@ -403,11 +418,11 @@ function IndividualZzzsView({
                 {myTier !== 'none' && <VerifiedBadgeInline tier={myTier} />}
               </View>
               <Text style={{ color: '#6B6760', fontSize: 10 }}>{you.tribe}</Text>
-            </View>
-            <View style={{ width: 75, alignItems: 'flex-end' }}>
-              <Text style={{ color: '#5EBFB5', fontSize: 11, fontWeight: '500' }}>{you.zzzs} ZZZs</Text>
               <BarFill value={you.zzzs ?? 0} max={maxZzzs} color="#5EBFB5" />
             </View>
+            <Text style={{ width: 55, color: '#5EBFB5', fontSize: 11, fontWeight: '500', textAlign: 'right' }}>
+              {you.zzzs} ZZZs
+            </Text>
           </View>
         </>
       )}
@@ -426,14 +441,18 @@ function IndividualHoursView({
   myTier: BiometricTier;
   totalMembers: number;
 }) {
-  const maxHours = 49;
+  const maxHours = getMaxIndividualHours(getNightsCompletedThisWeek()) || 1;
   return (
     <View style={{ paddingHorizontal: 16 }}>
       <Text style={{ color: '#6B6760', fontSize: 12, fontWeight: '500', marginBottom: 12 }}>
         Most consistent sleepers this week · {totalMembers} active member{totalMembers !== 1 ? 's' : ''}
       </Text>
 
-      {top.map(row => (
+      {top.length === 0 ? (
+        <Text style={{ color: '#6B6760', fontSize: 13, textAlign: 'center', paddingVertical: 20 }}>
+          No sleep data this week yet
+        </Text>
+      ) : top.map(row => (
         <View
           key={row.rank}
           style={{
@@ -461,11 +480,11 @@ function IndividualHoursView({
               {row.isSeed && <SeedBadge />}
             </View>
             <Text style={{ color: '#6B6760', fontSize: 10 }}>{row.tribe}</Text>
-          </View>
-          <View style={{ width: 50, alignItems: 'flex-end' }}>
-            <Text style={{ color: '#F5F2EA', fontSize: 11, fontWeight: '500' }}>{row.hours}h</Text>
             <BarFill value={row.hours ?? 0} max={maxHours} />
           </View>
+          <Text style={{ width: 40, color: '#F5F2EA', fontSize: 11, fontWeight: '500', textAlign: 'right' }}>
+            {row.hours}h
+          </Text>
         </View>
       ))}
 
@@ -498,11 +517,11 @@ function IndividualHoursView({
                 {myTier !== 'none' && <VerifiedBadgeInline tier={myTier} />}
               </View>
               <Text style={{ color: '#6B6760', fontSize: 10 }}>{you.tribe}</Text>
-            </View>
-            <View style={{ width: 50, alignItems: 'flex-end' }}>
-              <Text style={{ color: '#5EBFB5', fontSize: 11, fontWeight: '500' }}>{you.hours}h</Text>
               <BarFill value={you.hours ?? 0} max={maxHours} color="#5EBFB5" />
             </View>
+            <Text style={{ width: 40, color: '#5EBFB5', fontSize: 11, fontWeight: '500', textAlign: 'right' }}>
+              {you.hours}h
+            </Text>
           </View>
         </>
       )}

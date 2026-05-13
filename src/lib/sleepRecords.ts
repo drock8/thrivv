@@ -258,11 +258,11 @@ export async function getWeeklyIndividualLeaderboard(): Promise<
 
 export async function getTotalActiveMembers(): Promise<number> {
   const weekStart = getCurrentWeekStart();
-  const { count, error } = await supabase
+  const { data, error } = await supabase
     .from("sleep_records")
-    .select("pubkey", { count: "exact", head: true })
+    .select("pubkey")
     .eq("week_start", weekStart);
 
-  if (error) return 0;
-  return count ?? 0;
+  if (error || !data) return 0;
+  return new Set(data.map((r) => r.pubkey)).size;
 }
