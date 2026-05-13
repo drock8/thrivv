@@ -12,11 +12,14 @@ import { useMemoTransaction } from '../utils/useMemoTransaction';
 import { useBiometricTier } from '../lib/biometricStore';
 import {
   useHomeScreenData,
+  useMyWeeklySleep,
   useLogSleep,
   useCreateTeam,
   useJoinTeam,
   useEnsureProfile,
 } from '../hooks/useSleepData';
+import { calculateStreak } from '../lib/streaks';
+import { getTodayDate } from '../lib/weekUtils';
 
 const THRIVV_LOGO = require('../../assets/thrivv-logo-bone.png');
 const ATTESTATION_KEY = 'thrivv.lastAttestation';
@@ -40,7 +43,29 @@ export function HomeScreen() {
   const pubkey = selectedAccount?.publicKey.toBase58();
 
   const { team, teammates, noTeam, isLoading, teamPda } = useHomeScreenData(pubkey);
+  const sleepQuery = useMyWeeklySleep(pubkey);
+  const myRecords = sleepQuery.data ?? [];
   const logSleep = useLogSleep();
+
+  const sleepStats = (() => {
+    const today = getTodayDate();
+    const yesterday = new Date();
+    yesterday.setUTCDate(yesterday.getUTCDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    const lastNight = myRecords.find(r => r.sleep_date === today)
+      ?? myRecords.find(r => r.sleep_date === yesterdayStr);
+
+    const totalHours = myRecords.reduce((s, r) => s + Number(r.hours), 0);
+    const avgHours = myRecords.length > 0 ? totalHours / myRecords.length : null;
+
+    return {
+      lastNightHours: lastNight ? Number(lastNight.hours) : null,
+      averageHours: avgHours,
+      streakNights: calculateStreak(myRecords),
+      consistencyPct: myRecords.length > 0 ? Math.round((myRecords.length / 7) * 100) : 0,
+    };
+  })();
   const createTeamMutation = useCreateTeam();
   const joinTeamMutation = useJoinTeam();
   const ensureProfileMutation = useEnsureProfile();
@@ -474,7 +499,7 @@ export function HomeScreen() {
         )}
 
         {/* Section 3: Action Zone */}
-        <ActionZone onWakeConfirm={handleWakeConfirm} />
+        <ActionZone onWakeConfirm={handleWakeConfirm} stats={sleepStats} />
       </ScrollView>
     </View>
   );

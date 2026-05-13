@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import * as LocalAuthentication from 'expo-local-authentication';
+import { supabase } from './supabase';
 
 const BIOMETRIC_KEY = 'thrivv.profile.biometricVerified';
 
@@ -42,7 +43,7 @@ export async function detectHardwareWallet(): Promise<boolean> {
   }
 }
 
-export async function enrollBiometric(): Promise<{ success: boolean; tier: BiometricTier }> {
+export async function enrollBiometric(pubkey?: string): Promise<{ success: boolean; tier: BiometricTier }> {
   const hasHardware = await LocalAuthentication.hasHardwareAsync();
   if (!hasHardware) {
     return { success: false, tier: 'none' };
@@ -71,11 +72,31 @@ export async function enrollBiometric(): Promise<{ success: boolean; tier: Biome
     verifiedAt: new Date().toISOString(),
   });
 
+  if (pubkey) {
+    supabase
+      .from('profiles')
+      .update({ biometric_tier: tier })
+      .eq('pubkey', pubkey)
+      .then(({ error }) => {
+        if (error) console.log('[THRIVV] Failed to sync biometric tier:', error.message);
+      });
+  }
+
   return { success: true, tier };
 }
 
-export async function revokeBiometric() {
+export async function revokeBiometric(pubkey?: string) {
   await saveBiometricState(DEFAULT_STATE);
+
+  if (pubkey) {
+    supabase
+      .from('profiles')
+      .update({ biometric_tier: 'none' })
+      .eq('pubkey', pubkey)
+      .then(({ error }) => {
+        if (error) console.log('[THRIVV] Failed to sync biometric revocation:', error.message);
+      });
+  }
 }
 
 export function useBiometricTier(): BiometricTier {

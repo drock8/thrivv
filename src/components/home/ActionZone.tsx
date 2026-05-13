@@ -20,11 +20,32 @@ function useRealTime(): Date {
 
 type SleepState = 'awake' | 'sleeping';
 
-type Props = {
-  onWakeConfirm?: (durationMs: number) => Promise<string | null>;
+type SleepStats = {
+  lastNightHours: number | null;
+  averageHours: number | null;
+  streakNights: number;
+  consistencyPct: number;
 };
 
-export function ActionZone({ onWakeConfirm }: Props) {
+type Props = {
+  onWakeConfirm?: (durationMs: number) => Promise<string | null>;
+  stats?: SleepStats;
+};
+
+function formatHours(h: number): string {
+  const hrs = Math.floor(h);
+  const mins = Math.round((h - hrs) * 60);
+  return `${hrs}h ${String(mins).padStart(2, '0')}m`;
+}
+
+function sleepQuality(h: number | null): string {
+  if (h === null) return '';
+  if (h >= 7) return 'Good Sleep';
+  if (h >= 6) return 'Fair';
+  return 'Low';
+}
+
+export function ActionZone({ onWakeConfirm, stats }: Props) {
   const now = useRealTime();
   const bedtimeSetting = useBedtime();
   const [sleepState, setSleepState] = useState<SleepState>('awake');
@@ -132,10 +153,10 @@ export function ActionZone({ onWakeConfirm }: Props) {
             Last Night
           </Text>
           <Text className="text-foreground" style={{ fontSize: 15, fontWeight: '500' }}>
-            7h 42m
+            {stats?.lastNightHours != null ? formatHours(stats.lastNightHours) : '—'}
           </Text>
           <Text className="text-primary" style={{ fontSize: 10 }}>
-            Good Sleep
+            {sleepQuality(stats?.lastNightHours ?? null)}
           </Text>
         </View>
 
@@ -237,10 +258,10 @@ export function ActionZone({ onWakeConfirm }: Props) {
             Average
           </Text>
           <Text className="text-foreground" style={{ fontSize: 15, fontWeight: '500' }}>
-            7h 12m
+            {stats?.averageHours != null ? formatHours(stats.averageHours) : '—'}
           </Text>
           <Text className="text-primary" style={{ fontSize: 10 }}>
-            Good
+            {sleepQuality(stats?.averageHours ?? null)}
           </Text>
         </View>
       </View>
@@ -254,7 +275,7 @@ export function ActionZone({ onWakeConfirm }: Props) {
             Streak
           </Text>
           <Text className="text-foreground" style={{ fontSize: 14, fontWeight: '500' }}>
-            5 Nights
+            {stats?.streakNights ?? 0} {(stats?.streakNights ?? 0) === 1 ? 'Night' : 'Nights'}
           </Text>
         </View>
 
@@ -299,7 +320,7 @@ export function ActionZone({ onWakeConfirm }: Props) {
             Consistency
           </Text>
           <Text className="text-foreground" style={{ fontSize: 14, fontWeight: '500' }}>
-            87%
+            {stats?.consistencyPct ?? 0}%
           </Text>
         </View>
       </View>

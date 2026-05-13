@@ -2,6 +2,18 @@
 
 Items that MUST be completed before going to production. Each section describes what's needed, why, and current status.
 
+## Changelog
+
+### 2026-05-13
+- **ActionZone live data** — replaced hardcoded stats (7h 42m, 7h 12m, 5 Nights, 87%) with real Supabase-backed sleep data via `useMyWeeklySleep`. Shows last night, weekly average, streak, and consistency from actual records.
+- **Biometric tier Supabase sync** — `enrollBiometric()` and `revokeBiometric()` now write `biometric_tier` to the Supabase `profiles` table, so verified badges appear on leaderboards for other users (previously AsyncStorage-only).
+
+### 2026-05-12
+- Supabase data layer: profiles, team_metadata, team_members, sleep_records tables live with seed data
+- HomeScreen + LeaderboardScreen wired to real Supabase queries
+- Team create/join with invite codes
+- Dual-write sleep logging: Supabase first, on-chain memo in background
+
 ---
 
 ## 1. Supabase JWT Bridge (Authentication)

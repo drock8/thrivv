@@ -190,7 +190,8 @@ export function ProfileScreen() {
               </Text>
               <TouchableOpacity
                 onPress={async () => {
-                  const { success, tier } = await enrollBiometric();
+                  const pk = selectedAccount?.publicKey.toBase58();
+                  const { success, tier } = await enrollBiometric(pk);
                   if (success) {
                     const label = tier === 'hardware' ? 'Hardware Verified' : 'Biometric Verified';
                     Alert.alert('Verified!', `You now have the "${label}" badge.`);
@@ -227,7 +228,7 @@ export function ProfileScreen() {
                 onPress={() => {
                   Alert.alert('Remove verification?', 'Your verified badge will be removed from leaderboards and team cards.', [
                     { text: 'Cancel', style: 'cancel' },
-                    { text: 'Remove', style: 'destructive', onPress: revokeBiometric },
+                    { text: 'Remove', style: 'destructive', onPress: () => revokeBiometric(selectedAccount?.publicKey.toBase58()) },
                   ]);
                 }}
                 activeOpacity={0.8}
