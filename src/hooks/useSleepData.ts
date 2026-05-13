@@ -205,7 +205,7 @@ export function useHomeScreenData(pubkey: string | undefined) {
 
   const team: HomeScreenTeamData = {
     teamName: teamData.team.team_name ?? "Unnamed Team",
-    teamAvatar: { uri: teamData.team.team_avatar_url },
+    teamAvatar: { uri: teamData.team.team_avatar_url.replace('/svg?', '/png?') },
     teamZzzs: Math.round(teamZzzs * 100) / 100,
     teamHours: Math.round(teamHours * 100) / 100,
     streakNights: teamStreak,

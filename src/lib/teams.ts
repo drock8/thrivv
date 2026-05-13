@@ -12,7 +12,7 @@ export type TeamMetadata = {
 };
 
 export function teamAvatarUrl(teamName: string): string {
-  return `https://api.dicebear.com/7.x/shapes/svg?seed=${encodeURIComponent(teamName)}`;
+  return `https://api.dicebear.com/7.x/shapes/png?seed=${encodeURIComponent(teamName)}`;
 }
 
 export async function getTeamMetadata(

@@ -7,6 +7,7 @@ Items that MUST be completed before going to production. Each section describes 
 ### 2026-05-13
 - **ActionZone live data** — replaced hardcoded stats (7h 42m, 7h 12m, 5 Nights, 87%) with real Supabase-backed sleep data via `useMyWeeklySleep`. Shows last night, weekly average, streak, and consistency from actual records.
 - **Biometric tier Supabase sync** — `enrollBiometric()` and `revokeBiometric()` now write `biometric_tier` to the Supabase `profiles` table, so verified badges appear on leaderboards for other users (previously AsyncStorage-only).
+- **Team avatar SVG → PNG** — switched DiceBear URLs from SVG to PNG format so team avatars render in React Native's `<Image>`. Legacy SVG URLs in Supabase are converted at render time.
 
 ### 2026-05-12
 - Supabase data layer: profiles, team_metadata, team_members, sleep_records tables live with seed data
