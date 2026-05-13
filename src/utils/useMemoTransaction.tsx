@@ -24,8 +24,10 @@ export function useMemoTransaction() {
         throw new Error("Wallet not connected");
       }
 
+      console.log('[THRIVV] Getting blockhash...');
       const { value: latestBlockhash } =
         await connection.getLatestBlockhashAndContext();
+      console.log('[THRIVV] Got blockhash, building tx...');
 
       const memoInstruction = new TransactionInstruction({
         programId: MEMO_PROGRAM_ID,
@@ -41,7 +43,9 @@ export function useMemoTransaction() {
 
       const transaction = new VersionedTransaction(message);
 
+      console.log('[THRIVV] Requesting wallet signature...');
       const signature = await signAndSendTransaction(transaction);
+      console.log('[THRIVV] Got signature:', signature);
 
       await connection.confirmTransaction(
         { signature, ...latestBlockhash },

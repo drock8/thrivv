@@ -1,16 +1,23 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ScrollView, View, Text, Image, Animated, TouchableOpacity, Linking, Alert, AppState } from 'react-native';
+import { ScrollView, View, Text, Image, Animated, TouchableOpacity, Linking, Alert, AppState, TextInput } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import * as Clipboard from 'expo-clipboard';
+import { Users, Copy, ArrowRight } from 'lucide-react-native';
 import { useAuth } from '../utils/useAuth';
 import { SignInFeature } from '../components/sign-in/sign-in-feature';
 import { TeamCard } from '../components/home/TeamCard';
 import { TeammateCard } from '../components/home/TeammateCard';
 import { ActionZone } from '../components/home/ActionZone';
-import { getAvatar } from '../lib/avatars';
 import { useMemoTransaction } from '../utils/useMemoTransaction';
 import { useBiometricTier } from '../lib/biometricStore';
+import {
+  useHomeScreenData,
+  useLogSleep,
+  useCreateTeam,
+  useJoinTeam,
+  useEnsureProfile,
+} from '../hooks/useSleepData';
 
-const TEAM_AVATAR = require('../../assets/avatars/sleep-seekers.png');
 const THRIVV_LOGO = require('../../assets/thrivv-logo-bone.png');
 const ATTESTATION_KEY = 'thrivv.lastAttestation';
 
@@ -22,20 +29,6 @@ type Attestation = {
   date: string;
 };
 
-const MOCK_TEAM = {
-  teamName: 'Sleep Seekers',
-  teamZzzs: 188,
-  teamHours: 73,
-  streakNights: 2,
-  filledDays: 4,
-};
-
-const MOCK_TEAMMATES = [
-  { name: 'Anatoly', hours: 26, zzzs: 66, streak: 3, isYou: false },
-  { name: 'You', hours: 19, zzzs: 53, streak: 2, isYou: true },
-  { name: 'Satoshi', hours: 28, zzzs: 69, streak: 4, isYou: false },
-];
-
 function explorerUrl(sig: string) {
   return `https://explorer.solana.com/tx/${sig}?cluster=devnet`;
 }
@@ -44,12 +37,31 @@ export function HomeScreen() {
   const { selectedAccount, isReady } = useAuth();
   const memoMutation = useMemoTransaction();
   const biometricTier = useBiometricTier();
+  const pubkey = selectedAccount?.publicKey.toBase58();
+
+  const { team, teammates, noTeam, isLoading, teamPda } = useHomeScreenData(pubkey);
+  const logSleep = useLogSleep();
+  const createTeamMutation = useCreateTeam();
+  const joinTeamMutation = useJoinTeam();
+  const ensureProfileMutation = useEnsureProfile();
+  const ensureProfileRef = useRef(ensureProfileMutation.mutate);
+  ensureProfileRef.current = ensureProfileMutation.mutate;
 
   const [lastAttestation, setLastAttestation] = useState<Attestation | null>(null);
   const [toast, setToast] = useState<{ hours: number; mins: number; zzzs: number; sig: string } | null>(null);
   const toastAnim = useRef(new Animated.Value(-100)).current;
   const toastOpacity = useRef(new Animated.Value(0)).current;
   const toastTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  // Team creation/join state
+  const [teamMode, setTeamMode] = useState<'idle' | 'create' | 'join'>('idle');
+  const [teamNameInput, setTeamNameInput] = useState('');
+  const [joinCodeInput, setJoinCodeInput] = useState('');
+  const [createdJoinCode, setCreatedJoinCode] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (pubkey) ensureProfileRef.current(pubkey);
+  }, [pubkey]);
 
   const loadAttestation = useCallback(() => {
     AsyncStorage.getItem(ATTESTATION_KEY).then(val => {
@@ -86,32 +98,86 @@ export function HomeScreen() {
 
   const handleWakeConfirm = async (durationMs: number): Promise<string | null> => {
     if (!selectedAccount) return null;
-    const pubkey = selectedAccount.publicKey.toBase58();
+    const pk = selectedAccount.publicKey.toBase58();
     const ts = new Date().toISOString();
     const hrs = Math.floor(durationMs / 3600000);
     const mins = Math.floor((durationMs % 3600000) / 60000);
     const zzzs = 24.0;
-    const memo = `thrivv:submit_night:user=${pubkey}:date=${ts}:hours=${hrs + mins / 60}:zzzs=${zzzs}`;
+    const memo = `thrivv:submit_night:user=${pk}:date=${ts}:hours=${hrs + mins / 60}:zzzs=${zzzs}`;
 
+    // Write to Supabase first (fast, reliable)
     try {
-      const sig = await memoMutation.mutateAsync(memo);
-      if (sig) {
-        const attestation: Attestation = {
-          sig,
-          hours: hrs,
-          mins,
-          zzzs,
-          date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-        };
-        await AsyncStorage.setItem(ATTESTATION_KEY, JSON.stringify(attestation));
-        setLastAttestation(attestation);
-        showToast({ hours: hrs, mins, zzzs, sig });
-        return sig;
-      }
+      await logSleep.mutateAsync({
+        pubkey: pk,
+        durationMs,
+        txSig: null,
+        teamPda: teamPda ?? null,
+      });
+      showToast({ hours: hrs, mins, zzzs: 24.0, sig: 'supabase' });
     } catch (e: any) {
-      Alert.alert('Attestation error', e?.message ?? String(e));
+      console.log('[THRIVV] Supabase write failed:', e?.message);
+      Alert.alert('Error', 'Failed to log sleep: ' + (e?.message ?? String(e)));
+      return null;
     }
+
+    // Attempt on-chain attestation in background (may fail behind firewalls)
+    (async () => {
+      try {
+        console.log('[THRIVV] Starting memo transaction...');
+        const sig = await memoMutation.mutateAsync(memo);
+        console.log('[THRIVV] Memo result:', sig);
+        if (sig) {
+          const attestation: Attestation = {
+            sig,
+            hours: hrs,
+            mins,
+            zzzs,
+            date: new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          };
+          await AsyncStorage.setItem(ATTESTATION_KEY, JSON.stringify(attestation));
+          setLastAttestation(attestation);
+
+          logSleep.mutate({
+            pubkey: pk,
+            durationMs,
+            txSig: sig,
+            teamPda: teamPda ?? null,
+          });
+        }
+      } catch (e: any) {
+        console.log('[THRIVV] On-chain attestation skipped (network unavailable)');
+      }
+    })();
+
     return null;
+  };
+
+  const handleCreateTeam = async () => {
+    if (!pubkey || !teamNameInput.trim()) return;
+    try {
+      const result = await createTeamMutation.mutateAsync({
+        creatorPubkey: pubkey,
+        teamName: teamNameInput.trim(),
+      });
+      setCreatedJoinCode(result.joinCode);
+      setTeamNameInput('');
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to create team');
+    }
+  };
+
+  const handleJoinTeam = async () => {
+    if (!pubkey || !joinCodeInput.trim()) return;
+    try {
+      await joinTeamMutation.mutateAsync({
+        pubkey,
+        joinCode: joinCodeInput.trim(),
+      });
+      setJoinCodeInput('');
+      setTeamMode('idle');
+    } catch (e: any) {
+      Alert.alert('Error', e?.message ?? 'Failed to join team');
+    }
   };
 
   if (!isReady) {
@@ -164,19 +230,21 @@ export function HomeScreen() {
             }}
           >
             <Text style={{ color: '#5EBFB5', fontSize: 14, fontWeight: '600' }}>
-              Night logged on chain
+              {toast.sig === 'supabase' ? 'Sleep logged!' : 'Night logged on chain'}
             </Text>
             <Text style={{ color: '#F5F2EA', fontSize: 12, marginTop: 4 }}>
               {toast.hours}h {toast.mins}m · {toast.zzzs} ZZZs earned
             </Text>
-            <TouchableOpacity
-              onPress={() => Linking.openURL(explorerUrl(toast.sig))}
-              style={{ marginTop: 6 }}
-            >
-              <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>
-                View on Solana Explorer →
-              </Text>
-            </TouchableOpacity>
+            {toast.sig !== 'supabase' && (
+              <TouchableOpacity
+                onPress={() => Linking.openURL(explorerUrl(toast.sig))}
+                style={{ marginTop: 6 }}
+              >
+                <Text style={{ color: '#5EBFB5', fontSize: 12, fontWeight: '500' }}>
+                  View on Solana Explorer →
+                </Text>
+              </TouchableOpacity>
+            )}
           </TouchableOpacity>
         </Animated.View>
       )}
@@ -194,33 +262,197 @@ export function HomeScreen() {
           />
         </View>
 
-        {/* Section 1: Team Card */}
-        <TeamCard
-          teamName={MOCK_TEAM.teamName}
-          teamAvatar={TEAM_AVATAR}
-          teamZzzs={MOCK_TEAM.teamZzzs}
-          teamHours={MOCK_TEAM.teamHours}
-          streakNights={MOCK_TEAM.streakNights}
-          filledDays={MOCK_TEAM.filledDays}
-        />
-
-        {/* Section 2: Teammate Cards */}
-        <View className="bg-surface rounded-2xl mx-4" style={{ padding: 10 }}>
-          <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-end' }}>
-            {MOCK_TEAMMATES.map(m => (
-              <TeammateCard
-                key={m.name}
-                name={m.name}
-                avatar={getAvatar(m.name)!}
-                hours={m.hours}
-                zzzs={m.zzzs}
-                streakNights={m.streak}
-                isYou={m.isYou}
-                verified={m.isYou ? biometricTier : undefined}
-              />
-            ))}
+        {isLoading ? (
+          <View style={{ padding: 40, alignItems: 'center' }}>
+            <Text style={{ color: '#6B6760', fontSize: 14 }}>Loading team data...</Text>
           </View>
-        </View>
+        ) : noTeam ? (
+          /* No team — create or join */
+          <View style={{ marginHorizontal: 16 }}>
+            <View style={{
+              backgroundColor: '#171717', borderRadius: 16, padding: 20,
+              borderWidth: 1, borderColor: '#2A2A2A',
+            }}>
+              <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
+                <Users size={20} color="#5EBFB5" />
+                <Text style={{ color: '#F5F2EA', fontSize: 16, fontWeight: '600', marginLeft: 10 }}>
+                  Join a Tribe
+                </Text>
+              </View>
+              <Text style={{ color: '#6B6760', fontSize: 13, lineHeight: 19, marginBottom: 16 }}>
+                Form a tribe of 3 to unlock the {'×'}3 team multiplier. Create a new tribe or join with a code.
+              </Text>
+
+              {teamMode === 'idle' && !createdJoinCode && (
+                <View style={{ flexDirection: 'row', gap: 10 }}>
+                  <TouchableOpacity
+                    onPress={() => setTeamMode('create')}
+                    activeOpacity={0.8}
+                    style={{
+                      flex: 1, backgroundColor: '#5EBFB5', borderRadius: 12,
+                      padding: 14, alignItems: 'center',
+                    }}
+                  >
+                    <Text style={{ color: '#0A0A0A', fontSize: 14, fontWeight: '600' }}>Create Tribe</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity
+                    onPress={() => setTeamMode('join')}
+                    activeOpacity={0.8}
+                    style={{
+                      flex: 1, backgroundColor: '#2A2A2A', borderRadius: 12,
+                      padding: 14, alignItems: 'center', borderWidth: 1, borderColor: '#5EBFB5',
+                    }}
+                  >
+                    <Text style={{ color: '#5EBFB5', fontSize: 14, fontWeight: '600' }}>Join Tribe</Text>
+                  </TouchableOpacity>
+                </View>
+              )}
+
+              {teamMode === 'create' && !createdJoinCode && (
+                <View>
+                  <TextInput
+                    value={teamNameInput}
+                    onChangeText={setTeamNameInput}
+                    placeholder="Tribe name..."
+                    placeholderTextColor="#6B6760"
+                    maxLength={24}
+                    style={{
+                      backgroundColor: '#0A0A0A', borderRadius: 12, padding: 14,
+                      color: '#F5F2EA', fontSize: 15, borderWidth: 1, borderColor: '#2A2A2A',
+                      marginBottom: 10,
+                    }}
+                  />
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => setTeamMode('idle')}
+                      style={{ flex: 1, padding: 14, alignItems: 'center' }}
+                    >
+                      <Text style={{ color: '#6B6760', fontSize: 14 }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleCreateTeam}
+                      disabled={!teamNameInput.trim() || createTeamMutation.isPending}
+                      activeOpacity={0.8}
+                      style={{
+                        flex: 1, backgroundColor: '#5EBFB5', borderRadius: 12,
+                        padding: 14, alignItems: 'center',
+                        opacity: !teamNameInput.trim() ? 0.5 : 1,
+                      }}
+                    >
+                      <Text style={{ color: '#0A0A0A', fontSize: 14, fontWeight: '600' }}>
+                        {createTeamMutation.isPending ? 'Creating...' : 'Create'}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+
+              {createdJoinCode && (
+                <View style={{ alignItems: 'center' }}>
+                  <Text style={{ color: '#5EBFB5', fontSize: 14, fontWeight: '600', marginBottom: 8 }}>
+                    Tribe created! Share this code:
+                  </Text>
+                  <TouchableOpacity
+                    onPress={async () => {
+                      await Clipboard.setStringAsync(createdJoinCode);
+                      Alert.alert('Copied', 'Join code copied to clipboard');
+                    }}
+                    activeOpacity={0.7}
+                    style={{
+                      backgroundColor: '#0A0A0A', borderRadius: 12, padding: 16,
+                      flexDirection: 'row', alignItems: 'center', gap: 10,
+                      borderWidth: 1, borderColor: '#5EBFB5',
+                    }}
+                  >
+                    <Text style={{ color: '#F5F2EA', fontSize: 24, fontWeight: '700', fontFamily: 'monospace', letterSpacing: 4 }}>
+                      {createdJoinCode}
+                    </Text>
+                    <Copy size={18} color="#6B6760" />
+                  </TouchableOpacity>
+                  <Text style={{ color: '#6B6760', fontSize: 12, marginTop: 8 }}>
+                    Tap to copy · Share with 2 teammates to activate your tribe
+                  </Text>
+                </View>
+              )}
+
+              {teamMode === 'join' && (
+                <View>
+                  <TextInput
+                    value={joinCodeInput}
+                    onChangeText={(t) => setJoinCodeInput(t.toUpperCase())}
+                    placeholder="Enter 6-character code..."
+                    placeholderTextColor="#6B6760"
+                    maxLength={6}
+                    autoCapitalize="characters"
+                    style={{
+                      backgroundColor: '#0A0A0A', borderRadius: 12, padding: 14,
+                      color: '#F5F2EA', fontSize: 18, fontWeight: '600', fontFamily: 'monospace',
+                      letterSpacing: 4, textAlign: 'center',
+                      borderWidth: 1, borderColor: '#2A2A2A', marginBottom: 10,
+                    }}
+                  />
+                  <View style={{ flexDirection: 'row', gap: 10 }}>
+                    <TouchableOpacity
+                      onPress={() => { setTeamMode('idle'); setJoinCodeInput(''); }}
+                      style={{ flex: 1, padding: 14, alignItems: 'center' }}
+                    >
+                      <Text style={{ color: '#6B6760', fontSize: 14 }}>Cancel</Text>
+                    </TouchableOpacity>
+                    <TouchableOpacity
+                      onPress={handleJoinTeam}
+                      disabled={joinCodeInput.length < 6 || joinTeamMutation.isPending}
+                      activeOpacity={0.8}
+                      style={{
+                        flex: 1, backgroundColor: '#5EBFB5', borderRadius: 12,
+                        padding: 14, alignItems: 'center', flexDirection: 'row', justifyContent: 'center', gap: 6,
+                        opacity: joinCodeInput.length < 6 ? 0.5 : 1,
+                      }}
+                    >
+                      <Text style={{ color: '#0A0A0A', fontSize: 14, fontWeight: '600' }}>
+                        {joinTeamMutation.isPending ? 'Joining...' : 'Join'}
+                      </Text>
+                      <ArrowRight size={16} color="#0A0A0A" />
+                    </TouchableOpacity>
+                  </View>
+                </View>
+              )}
+            </View>
+          </View>
+        ) : (
+          <>
+            {/* Section 1: Team Card */}
+            {team && (
+              <TeamCard
+                teamName={team.teamName}
+                teamAvatar={team.teamAvatar}
+                teamZzzs={team.teamZzzs}
+                teamHours={team.teamHours}
+                streakNights={team.streakNights}
+                filledDays={team.filledDays}
+              />
+            )}
+
+            {/* Section 2: Teammate Cards */}
+            {teammates.length > 0 && (
+              <View className="bg-surface rounded-2xl mx-4" style={{ padding: 10 }}>
+                <View style={{ flexDirection: 'row', gap: 6, alignItems: 'flex-end' }}>
+                  {teammates.map(m => (
+                    <TeammateCard
+                      key={m.name}
+                      name={m.name}
+                      avatar={m.avatar}
+                      hours={m.hours}
+                      zzzs={m.zzzs}
+                      streakNights={m.streak}
+                      isYou={m.isYou}
+                      verified={m.isYou ? biometricTier : m.verified}
+                    />
+                  ))}
+                </View>
+              </View>
+            )}
+          </>
+        )}
 
         {/* Persistent on-chain proof line */}
         {lastAttestation && (

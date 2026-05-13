@@ -5,6 +5,10 @@ export type TeamMetadata = {
   team_name: string | null;
   team_avatar_url: string;
   updated_at: string;
+  is_seed: boolean;
+  join_code: string | null;
+  created_by: string | null;
+  created_at: string;
 };
 
 export function teamAvatarUrl(teamName: string): string {

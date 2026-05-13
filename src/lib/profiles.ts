@@ -5,6 +5,8 @@ export type Profile = {
   display_name: string | null;
   avatar_url: string | null;
   created_at: string;
+  is_seed: boolean;
+  biometric_tier: string;
 };
 
 export async function getProfile(pubkey: string): Promise<Profile | null> {

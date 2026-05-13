@@ -1,5 +1,38 @@
 # CHANGELOG
 
+## 2026-05-13
+
+### Replace Mock Data with Supabase-Backed Data
+
+**Goal:** Remove all hardcoded mock/demo data from HomeScreen and LeaderboardScreen. Wire up real Supabase queries for teams, sleep records, and leaderboards. Add team creation/join flow with invite codes. Persist sleep records via dual-write (Supabase + on-chain attestation).
+
+**Database changes (run via Supabase SQL Editor):**
+- `supabase/migrations/001_sleep_and_teams.sql` — Adds `is_seed`, `biometric_tier` columns to `profiles`. Adds `is_seed`, `join_code`, `created_by` to `team_metadata`. Creates `team_members` table (max 3 per team via trigger) and `sleep_records` table (one per user per night, weekly bucketing). Open RLS policies for anon-key development.
+- `supabase/seed.sql` — 28 demo profiles, 10 demo teams, team memberships, and current-week sleep records. All marked `is_seed = true` for easy cleanup.
+
+**Files created:**
+- `src/lib/weekUtils.ts` — ISO week start calculation (`getCurrentWeekStart()`, `getWeekStartForDate()`, `getTodayDate()`)
+- `src/lib/streaks.ts` — `calculateStreak()` counts consecutive days with sleep >= 7h target
+- `src/lib/sleepRecords.ts` — Supabase CRUD: `insertSleepRecord()` with background tribe multiplier check, `getMyWeeklySleep()`, `getWeeklyTeamLeaderboard()` with fallback, `getWeeklyIndividualLeaderboard()`, `getTotalActiveMembers()`
+- `src/lib/teamMembers.ts` — `createTeam()` generates UUID + 6-char join code, `joinTeam()` validates code + member limit, `leaveTeam()`, `getMyTeam()` returns team + member profiles, `ensureProfile()` upserts on login
+- `src/hooks/useSleepData.ts` — TanStack Query hooks: `useMyTeam`, `useMyWeeklySleep`, `useTeamLeaderboard`, `useIndividualLeaderboard`, `useLogSleep`, `useCreateTeam`, `useJoinTeam`. Derived hooks `useHomeScreenData` and `useLeaderboardData` transform raw data into component-ready props.
+- `.planning/PRODUCTION_READINESS.md` — 11-item pre-launch checklist (JWT auth, seed cleanup, rate limiting, mainnet migration, China/firewall RPC access, weekly resets, staking, attestation verification, push notifications, privacy, app store)
+
+**Files modified:**
+- `src/lib/profiles.ts` — Added `is_seed` and `biometric_tier` to `Profile` type
+- `src/lib/teams.ts` — Added `is_seed`, `join_code`, `created_by`, `created_at` to `TeamMetadata` type
+- `src/screens/HomeScreen.tsx` — Removed `MOCK_TEAM` and `MOCK_TEAMMATES`. Wired `useHomeScreenData()` for real team/teammate data. Added "Join a Tribe" card with create (name input → join code display with copy) and join (6-char code input) flows. Sleep logging now writes to Supabase first (instant feedback), then attempts on-chain memo in background (resilient to firewall blocks). Toast shows "Sleep logged!" for Supabase-only, "Night logged on chain" when memo succeeds.
+- `src/screens/LeaderboardScreen.tsx` — Removed all 4 static arrays + YOU rows. Wired `useLeaderboardData()` for real ranked data. Added orange "DEMO" badge on seed data rows. Dynamic member count replaces hardcoded "350 active members". Empty state messaging when no data.
+- `src/utils/useMemoTransaction.tsx` — Added debug logging for RPC flow diagnosis
+
+**Architecture decisions:**
+- Dual-write: Supabase is the read path for fast queries, on-chain memo is the audit trail
+- Anon key for writes (JWT bridge documented as pre-launch requirement)
+- Seed data uses `is_seed` flag + "DEMO" badge in UI, cleanup is `DELETE WHERE is_seed = true`
+- On-chain attestation is fire-and-forget — doesn't block UI, handles firewall/network failures gracefully
+
+---
+
 ## 2026-05-12
 
 ### Biometric Verification Badge
